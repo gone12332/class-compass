@@ -1,6 +1,6 @@
 // Keeps Class Compass working when the school wifi is weak or off.
 // Network first for the page so updates show up; cached copy when offline.
-var CACHE = "class-compass-v7";
+var CACHE = "class-compass-v8";
 var FILES = ["./", "./index.html", "./config.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 self.addEventListener("install", function(e){
   e.waitUntil(caches.open(CACHE).then(function(c){ return c.addAll(FILES); }).then(function(){ return self.skipWaiting(); }));

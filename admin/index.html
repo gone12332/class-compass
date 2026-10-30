@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#050505">
 <meta name="robots" content="noindex,nofollow">
-<title>Class Compass Admin</title>
+<title>Login</title>
 <link rel="icon" href="../icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -139,17 +139,8 @@ tr.banned td{color:var(--red)}
 
   <!-- LOGIN -->
   <section id="loginView" class="login" aria-labelledby="loginTitle">
-    <h1 id="loginTitle" class="cursor">Class Compass // admin</h1>
+    <h1 id="loginTitle" class="cursor">Login</h1>
 
-    <div class="panel setup" id="setupPanel" hidden>
-      <h2>Stats aren't set up yet</h2>
-      <ol>
-        <li>Make a free account at <b>supabase.com</b> and create a new project.</li>
-        <li>Open <b>SQL Editor</b>, paste everything from <code>supabase/setup.sql</code> in the repo, and tap <b>Run</b>.</li>
-        <li>Open <b>Authentication &gt; Users &gt; Add user</b>. Email: <code>root@example.com</code>, pick a password, tick <b>Auto confirm</b>.</li>
-        <li>Open <b>Project Settings &gt; API</b> and copy the <b>Project URL</b> and the <b>anon public</b> key into <code>config.js</code>.</li>
-      </ol>
-    </div>
 
     <form id="loginForm" class="panel" novalidate>
       <label for="user">User
@@ -161,7 +152,6 @@ tr.banned td{color:var(--red)}
       <p class="err" id="loginErr" role="alert"></p>
       <button class="btn primary" type="submit" id="loginBtn">Log in</button>
     </form>
-    <p class="muted small">This page only shows anonymous numbers: random phone IDs, scans, trips and arrivals. No names or locations are collected.</p>
   </section>
 
   <!-- DASHBOARD -->
@@ -317,8 +307,8 @@ function rpc(name, args){
 function showLogin(msg){
   clearInterval(timer); timer = null;
   $("dashView").hidden = true; $("loginView").hidden = false;
-  $("setupPanel").hidden = configured; $("loginBtn").disabled = !configured;
-  $("loginErr").textContent = msg || (configured ? "" : "Add your Supabase details to config.js first.");
+  $("loginBtn").disabled = !configured;
+  $("loginErr").textContent = msg || (configured ? "" : "Login is unavailable.");
 }
 function showDash(){
   $("loginView").hidden = true; $("dashView").hidden = false;
