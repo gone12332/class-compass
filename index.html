@@ -365,6 +365,13 @@ code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9r
     </div>
 
     <div class="spot">
+      <h3>Add classes from a link</h3>
+      <p class="muted">Got a share link? Paste it here. This is the way to move classes into the iPhone home-screen app.</p>
+      <input type="text" id="pasteLink" autocomplete="off" aria-label="Paste a share link" placeholder="Paste the link here">
+      <button class="btn" id="pasteBtn">Add these classes</button>
+    </div>
+
+    <div class="spot">
       <h3>Edit a class</h3>
       <ul class="list" id="editList"></ul>
     </div>
@@ -377,6 +384,7 @@ code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9r
         <li>Stay away from metal lockers and big speakers for a second. They confuse the compass.</li>
         <li>Save spots near windows or doors. GPS works better there.</li>
         <li>On iPhone, tap <b>Share</b> then <b>Add to Home Screen</b> to keep it like an app.</li>
+        <li>The home-screen app keeps its own list. If you saved classes in Safari first, copy the share link there and paste it under "Add classes from a link" in the home-screen app.</li>
       </ul>
     </div>
 
@@ -509,8 +517,10 @@ function packClasses(){
     return [c.name, +c.lat.toFixed(6), +c.lon.toFixed(6), c.notes || "", c.time || "", c.floor || "", c.color || ""];
   })));
 }
-function checkImport(){
-  var m = location.hash.match(/^#rooms=([A-Za-z0-9_-]+)$/); if (!m) return;
+function checkImport(src){
+  var fromBox = typeof src === "string";
+  var m = (fromBox ? src.trim() : location.hash).match(/#rooms=([A-Za-z0-9_-]+)\s*$/);
+  if (!m){ if (fromBox) toast("That isn't a Class Compass share link."); return; }
   try{
     var arr = JSON.parse(b64urlDecode(m[1]));
     pendingImport = arr.map(function(a){
@@ -524,6 +534,7 @@ function checkImport(){
     $("importTitle").textContent = "Add " + pendingImport.length + " shared " + (pendingImport.length === 1 ? "class" : "classes") + "?";
     $("importText").textContent = names.slice(0,6).join(", ") + (names.length > 6 ? " and more" : "");
     $("importBanner").hidden = false;
+    if (fromBox){ renderHome(); show("home"); }
   } else {
     toast("That share link looks broken. Ask for a new one.");
   }
@@ -678,7 +689,7 @@ var speak = false, lastSpoken = "", lastSpokenAt = 0;
 try{ speak = localStorage.getItem(KEY + ".speak") === "1"; }catch(e){}
 
 function openCompass(c, isDemo){
-  target = c; demo = isDemo; here = null; heading = null; headingSrc = null; arrivedOnce = false; started = false;
+  target = c; demo = isDemo; here = null; fixAt = 0; walkAt = 0; tipLocked = false; $("arrow").style.opacity = 1; heading = null; headingSrc = null; arrivedOnce = false; started = false;
   $("targetName").textContent = c.name;
   $("notesBody").textContent = c.notes || "";
   $("notesBox").hidden = !c.notes;
@@ -770,7 +781,7 @@ function onAbs(e){
 function onOrient(e){
   if (typeof e.webkitCompassHeading === "number" && !isNaN(e.webkitCompassHeading)){
     iosAcc = e.webkitCompassAccuracy;
-    feedHeading(norm360(e.webkitCompassHeading + screenAngle()), "compass", e.beta);
+    feedHeading(norm360(e.webkitCompassHeading + screenAngle()), "compass", null);
   } else if (!gotAbs && e.absolute === true && e.alpha != null){
     feedHeading(norm360(360 - e.alpha + screenAngle()), "compass", e.beta);
   }
@@ -787,17 +798,37 @@ function noCompass(msg){
   if (headingSrc === "compass") return;
   headingSrc = null; setChip("cmp", "warn", msg + ". Walk to aim the arrow.");
 }
+var fixAt = 0, walkAt = 0;
+/* Blend each GPS reading with the last one, trusting whichever is more accurate.
+   Uncertainty grows by walking speed between readings, so real movement still shows up quickly. */
 function onPos(p){
-  here = { lat: p.coords.latitude, lon: p.coords.longitude, acc: p.coords.accuracy || 99 };
+  var c = p.coords, acc = Math.max(3, c.accuracy || 99), now = Date.now();
+  if (acc > 150 && here) return; // ignore wild readings once we have a decent one
+  if (!here || now - fixAt > 30000){
+    here = { lat: c.latitude, lon: c.longitude, acc: acc };
+  } else {
+    var dt = (now - fixAt) / 1000, q = here.acc * here.acc + Math.pow(2.5 * dt, 2), k = q / (q + acc * acc);
+    // A big jump that the error bars can't explain means we really moved: take the new reading.
+    if (distanceM(here, { lat: c.latitude, lon: c.longitude }) > 3 * Math.sqrt(q + acc * acc)) k = 1;
+    here = k === 1 ? { lat: c.latitude, lon: c.longitude, acc: acc } : { lat: here.lat + k * (c.latitude - here.lat), lon: here.lon + k * (c.longitude - here.lon), acc: Math.sqrt((1 - k) * q) };
+  }
+  fixAt = now;
   // Without a compass, use the walking direction from GPS when moving.
-  if (headingSrc !== "compass" && p.coords.heading != null && !isNaN(p.coords.heading) && (p.coords.speed || 0) > 0.6){
-    heading = p.coords.heading; headingSrc = "walking";
+  if (headingSrc !== "compass" && c.heading != null && !isNaN(c.heading) && c.heading >= 0 && (c.speed || 0) > 0.6){
+    heading = c.heading; headingSrc = "walking"; walkAt = now;
   }
 }
 function onPosErr(err){
-  if (err.code === 1){ setChip("gps","bad","Location: blocked"); setSay("Location is turned off"); showTip("Turn on location for this browser in your phone settings, then come back and tap the class again."); }
+  if (err.code === 1){
+    setChip("gps","bad","Location: blocked"); setSay("Location is turned off");
+    showTip(/iPhone|iPad|iPod/.test(navigator.userAgent)
+      ? "On iPhone: open Settings, then Privacy & Security, Location Services, Safari Websites, and pick While Using the App. Then come back and tap the class again."
+      : "Tap the lock next to the web address, turn on Location, then tap the class again.");
+    tipLocked = true;
+  }
   else { setChip("gps","warn","Location: searching…"); }
 }
+var tipLocked = false;
 function showTip(t){ $("tipText").textContent = t; $("tipBox").hidden = false; }
 
 function rotate(el, prev, next){
@@ -835,9 +866,11 @@ function tick(){
     setChip("cmp", "warn", "Compass: using your walking");
   }
 
+  if (headingSrc === "walking" && now - walkAt > 6000){ heading = null; headingSrc = null; }
   if (!here){ return; }
   var acc = here.acc;
-  setChip("gps", acc <= 12 ? "good" : acc <= 30 ? "warn" : "bad", "Location: ±" + Math.round(acc) + " m");
+  if (!demo && fixAt && now - fixAt > 15000) setChip("gps", "warn", "Location: looking…");
+  else setChip("gps", acc <= 12 ? "good" : acc <= 30 ? "warn" : "bad", "Location: ±" + Math.round(acc) + " m");
 
   var d = distanceM(here, target), b = bearingDeg(here, target);
   var arriveR = Math.max(6, Math.min(acc, 15));
@@ -860,6 +893,7 @@ function tick(){
   if (heading != null){
     var rel = norm180(b - heading);
     shownArrow = rotate($("arrow"), shownArrow, rel);
+    $("arrow").style.opacity = acc > d ? 0.45 : 1;
     shownRose = rotate($("rose"), shownRose, -heading);
     $("dial").classList.remove("nocompass");
     words = turnWords(rel);
@@ -876,7 +910,7 @@ function tick(){
   var tip = null;
   if (headingSrc === "compass" && tilt > 55) tip = "Hold the phone flat, like a plate, so the arrow stays steady.";
   else if (acc > 30) tip = "GPS is fuzzy right now (±" + Math.round(acc) + " m). Move toward a window or doorway, or use the notes below.";
-  if (tip) showTip(tip); else $("tipBox").hidden = true;
+  if (tip) showTip(tip); else if (!tipLocked) $("tipBox").hidden = true;
 
   if (speak && now - lastSpokenAt > 6000 && (words !== lastSpoken || now - lastSpokenAt > 15000)){
     lastSpoken = words; lastSpokenAt = now; say(words + ". " + stepsText(d) + ".");
@@ -919,7 +953,8 @@ $("demoStep").addEventListener("click", function(){
 /* ---------- boot ---------- */
 renderHome();
 checkImport();
-window.addEventListener("hashchange", checkImport);
+$("pasteBtn").addEventListener("click", function(){ checkImport($("pasteLink").value); });
+window.addEventListener("hashchange", function(){ checkImport(); });
 // Work offline once installed (only on a real https host, not a saved file).
 if ("serviceWorker" in navigator && location.protocol === "https:"){
   navigator.serviceWorker.register("sw.js").catch(function(){});
