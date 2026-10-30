@@ -158,6 +158,28 @@ code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9r
 .confetti{position:fixed;inset:0;pointer-events:none;z-index:15}
 @media (prefers-reduced-motion:reduce){#rose,#arrow,.btn,.meter>i{transition:none}}
 
+/* ---------- v3: stars, skins, days ---------- */
+.stars-stat{display:flex;align-items:center;gap:12px;align-self:flex-start;padding:10px 18px 10px 12px;border-radius:999px;background:rgba(0,0,0,.2);line-height:1.2}
+.stars-stat b{font-family:var(--display);font-size:1.35rem;color:var(--yellow)}
+.days{display:flex;gap:8px;flex-wrap:wrap}
+.days label{flex-direction:row;font-weight:700}
+.days input{position:absolute;opacity:0;pointer-events:none}
+.days span{display:grid;place-items:center;min-width:48px;height:48px;padding:0 10px;border-radius:14px;background:rgba(0,0,0,.22);color:var(--chalk-dim);font-family:var(--display);font-weight:600}
+.days input:checked+span{background:var(--yellow);color:var(--yellow-ink);box-shadow:0 3px 0 var(--yellow-deep)}
+.days input:focus-visible+span{outline:3px solid var(--yellow);outline-offset:2px}
+.skins{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.skin-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;border-radius:18px;border:3px solid transparent;background:rgba(0,0,0,.22);font-family:var(--display);font-weight:600}
+.skin-btn[aria-checked="true"]{border-color:var(--yellow);background:rgba(246,213,92,.12)}
+.skin-btn svg{width:64px;height:64px}
+.skin-btn .n-light{fill:#ffe58a}.skin-btn .n-dark{fill:var(--yellow-deep)}
+.ontime{font-weight:700;margin-top:6px;padding:6px 14px;border-radius:999px;align-self:center;background:rgba(0,0,0,.18)}
+.ontime.good{color:var(--good)}.ontime.warn{color:var(--warn)}.ontime.bad{color:var(--bad)}
+.dist{align-items:center}
+.flame{transform-origin:100px 122px;animation:flick .18s ease-in-out infinite alternate}
+@keyframes flick{to{transform:scaleY(.7)}}
+.starpop{font-family:var(--display);font-weight:700;color:var(--yellow);font-size:1.2rem;text-align:center}
+@media (prefers-reduced-motion:reduce){.flame{animation:none}}
+
 /* ---------- look & feel v2 ---------- */
 body{
   background-color:var(--board);
@@ -263,6 +285,10 @@ input[type=range]{width:100%;accent-color:var(--yellow);height:36px}
         <p>Phones only share location with pages whose address starts with <b>https://</b>. Open Class Compass from its https link instead of a saved file.</p>
       </div>
 
+      <div class="stars-stat" id="starStat" hidden>
+        <svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 L25 15 L38 15.6 L28 24 L31.5 37 L20 29.8 L8.5 37 L12 24 L2 15.6 L15 15 Z" fill="#f6d55c" stroke="#2a2610" stroke-width="2" stroke-linejoin="round"/></svg>
+        <span><b id="starCount">0</b> <span id="starWord">stars</span><br><span class="muted small" id="starLevel"></span></span>
+      </div>
       <p class="greet" id="homeLead"><span id="greet">Hi there!</span> Where are you headed?</p>
       <button class="hero" id="nextHero" hidden>
         <span class="hero-top"><span class="pill">Next up</span><span id="heroWhen"></span></span>
@@ -335,10 +361,27 @@ input[type=range]{width:100%;accent-color:var(--yellow);height:36px}
           <text x="35" y="104.5" text-anchor="middle" font-family="Fredoka,system-ui,sans-serif" font-weight="600" font-size="12" fill="#b9c7bf">W</text>
         </g>
         <g id="arrow" filter="url(#lift)">
-          <path class="n-light" d="M100 34 L100 108 L66 132 Z"/>
-          <path class="n-dark" d="M100 34 L134 132 L100 108 Z"/>
-          <path d="M100 34 L134 132 L100 108 L66 132 Z" fill="none" stroke="#2a2610" stroke-width="2.5" stroke-linejoin="round"/>
-          <circle cx="100" cy="100" r="7" fill="#2a2610"/><circle cx="100" cy="100" r="3" fill="#f3f1e7"/>
+          <g class="skin" data-skin="needle">
+            <path class="n-light" d="M100 34 L100 108 L66 132 Z"/>
+            <path class="n-dark" d="M100 34 L134 132 L100 108 Z"/>
+            <path d="M100 34 L134 132 L100 108 L66 132 Z" fill="none" stroke="#2a2610" stroke-width="2.5" stroke-linejoin="round"/>
+            <circle cx="100" cy="100" r="7" fill="#2a2610"/><circle cx="100" cy="100" r="3" fill="#f3f1e7"/>
+          </g>
+          <g class="skin" data-skin="rocket" hidden>
+            <path class="flame" d="M90 122 L100 152 L110 122 Z" fill="#ffb36b"/>
+            <path d="M84 98 L66 128 L86 120 Z M116 98 L134 128 L114 120 Z" fill="#ff8a80" stroke="#2a2610" stroke-width="2.5" stroke-linejoin="round"/>
+            <path class="n-light" d="M100 30 C117 48 121 82 116 122 L84 122 C79 82 83 48 100 30 Z"/>
+            <path class="n-dark" d="M100 30 C117 48 121 82 116 122 L100 122 Z"/>
+            <path d="M100 30 C117 48 121 82 116 122 L84 122 C79 82 83 48 100 30 Z" fill="none" stroke="#2a2610" stroke-width="2.5" stroke-linejoin="round"/>
+            <circle cx="100" cy="72" r="10" fill="#8fc7ff" stroke="#2a2610" stroke-width="2.5"/>
+            <circle cx="97" cy="69" r="3" fill="#f3f1e7"/>
+          </g>
+          <g class="skin" data-skin="plane" hidden>
+            <path class="n-light" d="M100 28 L60 140 L100 116 Z"/>
+            <path class="n-dark" d="M100 28 L140 140 L100 116 Z"/>
+            <path d="M100 28 L94 134 L100 116 Z" fill="#2a2610" opacity=".35"/>
+            <path d="M100 28 L140 140 L100 116 L60 140 Z M100 28 L100 116" fill="none" stroke="#2a2610" stroke-width="2.5" stroke-linejoin="round"/>
+          </g>
         </g>
         <g id="star" hidden>
           <path d="M100 42 L115 82 L158 84 L124 110 L136 152 L100 128 L64 152 L76 110 L42 84 L85 82 Z" fill="#7ee0a1" stroke="#1d3b34" stroke-width="3" stroke-linejoin="round" filter="url(#lift)"/>
@@ -351,6 +394,7 @@ input[type=range]{width:100%;accent-color:var(--yellow);height:36px}
     <div class="dist">
       <span class="big" id="distBig">--</span>
       <span class="steps muted" id="distSteps">&nbsp;</span>
+      <span class="ontime" id="onTime" hidden></span>
     </div>
     <div class="trip" id="trip" hidden>
       <div class="trip-bar"><i id="tripFill"></i><b id="tripDot"></b></div>
@@ -421,6 +465,11 @@ input[type=range]{width:100%;accent-color:var(--yellow);height:36px}
       </div>
 
       <fieldset style="border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:8px">
+        <legend style="font-weight:700;margin-bottom:8px">School days <span class="hint" style="font-weight:400;color:var(--chalk-dim)">Leave all off for every day</span></legend>
+        <div class="days" id="dayPick"></div>
+      </fieldset>
+
+      <fieldset style="border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:8px">
         <legend style="font-weight:700;margin-bottom:8px">Color</legend>
         <div class="colors" id="colorPick"></div>
       </fieldset>
@@ -461,6 +510,11 @@ input[type=range]{width:100%;accent-color:var(--yellow);height:36px}
         <button class="btn primary" id="copyLink">Copy link</button>
         <button class="btn" id="nativeShare" hidden>Share…</button>
       </div>
+    </div>
+
+    <div class="spot">
+      <h3>Pick your arrow</h3>
+      <div class="skins" id="skinPick" role="radiogroup" aria-label="Arrow style"></div>
     </div>
 
     <div class="spot">
@@ -518,6 +572,15 @@ function validClass(c){
     Math.abs(c.lat) <= 90 && Math.abs(c.lon) <= 180;
 }
 var classes = load();
+/* Prefs live under their own key so the saved class list is never touched. */
+var prefs = { skin: "needle", stars: {}, total: 0 };
+try{ var pr = JSON.parse(localStorage.getItem(KEY + ".prefs") || "null"); if (pr && typeof pr === "object") prefs = Object.assign(prefs, pr); }catch(e){}
+function savePrefs(){ try{ localStorage.setItem(KEY + ".prefs", JSON.stringify(prefs)); }catch(e){} }
+var LEVELS = [[0,"New explorer"],[5,"Hallway scout"],[15,"Map master"],[40,"School legend"],[100,"Compass champion"]];
+function levelFor(n){ var l = LEVELS[0]; LEVELS.forEach(function(x){ if (n >= x[0]) l = x; }); return l; }
+function nextLevel(n){ for (var i = 0; i < LEVELS.length; i++) if (LEVELS[i][0] > n) return LEVELS[i]; return null; }
+var DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+function onToday(c){ return !c.days || !c.days.length || c.days.indexOf(new Date().getDay()) >= 0; }
 
 /* ---------- helpers ---------- */
 var $ = function(id){ return document.getElementById(id); };
@@ -571,7 +634,7 @@ function show(v){
 /* ---------- home ---------- */
 function nextClassId(){
   var now = minutesNow(), best = null, bestM = 1e9;
-  classes.forEach(function(c){ var m = toMin(c.time); if (m != null && m >= now - 10 && m < bestM){ bestM = m; best = c.id; } });
+  classes.forEach(function(c){ var m = toMin(c.time); if (onToday(c) && m != null && m >= now - 10 && m < bestM){ bestM = m; best = c.id; } });
   return best;
 }
 function sortedClasses(){
@@ -586,6 +649,8 @@ function classRow(c, isNext, action){
   var meta = [];
   if (c.time) meta.push(fmtTime(c.time));
   if (c.floor) meta.push("Floor " + c.floor);
+  if (c.days && c.days.length && c.days.length < 7) meta.push(c.days.slice().sort().map(function(d){ return DAYS[d]; }).join(" "));
+  if (prefs.stars[c.id]) meta.push("\u2605 " + prefs.stars[c.id]);
   return '<li><button class="class' + (isNext ? ' next' : '') + '" data-id="' + esc(c.id) + '" data-act="' + action + '" aria-label="' + esc((action === "go" ? "Go to " : "Edit ") + c.name) + '">' +
     '<span class="badge" style="background:' + esc(c.color || COLORS[0]) + '">' + esc(initials(c.name)) + '</span>' +
     '<span class="text">' + (isNext ? '<span class="pill">Next up</span><br>' : '') +
@@ -595,6 +660,10 @@ function classRow(c, isNext, action){
 function renderHome(){
   var next = nextClassId(), h = new Date().getHours();
   $("greet").textContent = h < 12 ? "Good morning!" : h < 17 ? "Good afternoon!" : "Hi there!";
+  $("starStat").hidden = !prefs.total;
+  $("starCount").textContent = prefs.total; $("starWord").textContent = prefs.total === 1 ? "star" : "stars";
+  var nl = nextLevel(prefs.total);
+  $("starLevel").textContent = levelFor(prefs.total)[1] + (nl ? " · " + (nl[0] - prefs.total) + " more to " + nl[1] : "");
   var nc = classes.find(function(c){ return c.id === next; });
   $("nextHero").hidden = !nc;
   if (nc){
@@ -628,7 +697,7 @@ function b64urlEncode(str){ return btoa(unescape(encodeURIComponent(str))).repla
 function b64urlDecode(s){ s = s.replace(/-/g,"+").replace(/_/g,"/"); while (s.length % 4) s += "="; return decodeURIComponent(escape(atob(s))); }
 function packClasses(){
   return b64urlEncode(JSON.stringify(classes.map(function(c){
-    return [c.name, +c.lat.toFixed(6), +c.lon.toFixed(6), c.notes || "", c.time || "", c.floor || "", c.color || ""];
+    return [c.name, +c.lat.toFixed(6), +c.lon.toFixed(6), c.notes || "", c.time || "", c.floor || "", c.color || "", (c.days || []).join("")];
   })));
 }
 function checkImport(src){
@@ -640,7 +709,8 @@ function checkImport(src){
     pendingImport = arr.map(function(a){
       return { id: uid(), name: String(a[0]).slice(0,40), lat: +a[1], lon: +a[2], notes: String(a[3]||"").slice(0,300),
                time: /^\d\d:\d\d$/.test(a[4]) ? a[4] : "", floor: String(a[5]||"").slice(0,12),
-               color: COLORS.indexOf(a[6]) >= 0 ? a[6] : COLORS[0] };
+               color: COLORS.indexOf(a[6]) >= 0 ? a[6] : COLORS[0],
+               days: String(a[7] || "").split("").map(Number).filter(function(d){ return d >= 0 && d <= 6; }) };
     }).filter(validClass);
   }catch(e){ pendingImport = null; }
   if (pendingImport && pendingImport.length){
@@ -707,6 +777,9 @@ function setSpotUI(state, text, pct){
 function describeSpot(s){
   return "Spot saved (about ±" + Math.max(1, Math.round(s.acc || 0)) + " m)";
 }
+$("dayPick").innerHTML = [1,2,3,4,5,6,0].map(function(d){
+  return '<label><input type="checkbox" id="day' + d + '" value="' + d + '"><span>' + DAYS[d] + '</span></label>';
+}).join("");
 function openEdit(c){
   editing = c;
   spot = c ? { lat: c.lat, lon: c.lon, acc: c.acc } : null;
@@ -715,6 +788,7 @@ function openEdit(c){
   $("fNotes").value = c ? (c.notes || "") : "";
   $("fTime").value = c ? (c.time || "") : "";
   $("fFloor").value = c ? (c.floor || "") : "";
+  for (var di = 0; di < 7; di++) $("day" + di).checked = !!(c && c.days && c.days.indexOf(di) >= 0);
   $("fCoords").value = c ? c.lat.toFixed(6) + ", " + c.lon.toFixed(6) : "";
   var col = c && c.color ? c.color : COLORS[classes.length % COLORS.length];
   var idx = Math.max(0, COLORS.indexOf(col)); $("col" + idx).checked = true;
@@ -784,6 +858,7 @@ $("form").addEventListener("submit", function(e){
   var colorEl = document.querySelector('input[name=color]:checked');
   var data = { name: name.slice(0,40), lat: place.lat, lon: place.lon, acc: place.acc || 0,
     notes: $("fNotes").value.trim(), time: $("fTime").value || "", floor: $("fFloor").value.trim(),
+    days: [0,1,2,3,4,5,6].filter(function(d){ return $("day" + d).checked; }),
     color: colorEl ? colorEl.value : COLORS[0] };
   if (editing) Object.assign(editing, data); else classes.push(Object.assign({ id: uid() }, data));
   if (save()){ toast(editing ? "Class updated" : "Saved " + data.name); }
@@ -796,7 +871,7 @@ $("delYes").addEventListener("click", function(){
 });
 
 /* ---------- compass ---------- */
-var tripStart = null, target = null, demo = false, here = null, geoWatch = null;
+var wasOn = false, lastOnAt = 0, tripStart = null, target = null, demo = false, here = null, geoWatch = null;
 var heading = null, headingSrc = null, hx = 0, hy = 0, lastOrientAt = 0, iosAcc = null, tilt = 0;
 var shownArrow = 0, shownRose = 0, arrivedOnce = false, wakeLock = null, raf = null, started = false;
 var speak = false, lastSpoken = "", lastSpokenAt = 0;
@@ -804,6 +879,7 @@ try{ speak = localStorage.getItem(KEY + ".speak") === "1"; }catch(e){}
 
 function openCompass(c, isDemo){
   tripStart = null; $("trip").hidden = true; $("dial").classList.remove("ontarget"); $("say").classList.remove("ontarget");
+  wasOn = false; $("distSteps").dataset.star = ""; $("onTime").hidden = true;
   target = c; demo = isDemo; here = null; fixAt = 0; walkAt = 0; tipLocked = false; $("arrow").style.opacity = 1; heading = null; headingSrc = null; arrivedOnce = false; started = false;
   $("targetName").textContent = c.name;
   $("notesBody").textContent = c.notes || "";
@@ -825,10 +901,10 @@ function permissionsLikelyGranted(){
   return !(window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === "function") && sessionReady;
 }
 var sessionReady = false;
-$("startBtn").addEventListener("click", function(){ beginNav(true); });
+$("startBtn").addEventListener("click", function(){ audioOn(); beginNav(true); });
 $("backBtn").addEventListener("click", function(){ renderHome(); show("home"); });
 $("soundBtn").addEventListener("click", function(){
-  speak = !speak; try{ localStorage.setItem(KEY + ".speak", speak ? "1" : "0"); }catch(e){}
+  audioOn(); speak = !speak; try{ localStorage.setItem(KEY + ".speak", speak ? "1" : "0"); }catch(e){}
   updateSoundBtn(); if (speak) say("Talking directions on"); else if (window.speechSynthesis) speechSynthesis.cancel();
 });
 function updateSoundBtn(){
@@ -991,10 +1067,19 @@ function tick(){
   var arriveR = Math.max(6, Math.min(acc, 15));
 
   if (d <= arriveR){
-    if (!arrivedOnce){ arrivedOnce = true; celebrate(); say("You made it to " + target.name + "!"); }
+    if (!arrivedOnce){
+      arrivedOnce = true; celebrate(); chime([523, 659, 784, 1047]); say("You made it to " + target.name + "!");
+      if (!demo){
+        var before = levelFor(prefs.total)[1];
+        prefs.total = (prefs.total || 0) + 1; prefs.stars[target.id] = (prefs.stars[target.id] || 0) + 1; savePrefs();
+        var after = levelFor(prefs.total)[1];
+        $("distSteps").dataset.star = after !== before ? "New level: " + after + "!" : "+1 star! You have " + prefs.total + ".";
+      } else $("distSteps").dataset.star = "Practice done! Now try a real class.";
+    }
     $("dial").classList.add("arrived"); $("dial").classList.remove("ontarget"); $("arrow").setAttribute("hidden",""); $("trip").hidden = true; $("star").removeAttribute("hidden");
     setSay("You're here! Look for the room sign.", true);
-    $("distBig").textContent = Math.round(d) + " m"; $("distSteps").textContent = "right around here";
+    $("distBig").textContent = Math.round(d) + " m"; $("distSteps").textContent = $("distSteps").dataset.star || "right around here";
+    $("onTime").hidden = true;
     shownRose = rotate($("rose"), shownRose, heading == null ? 0 : -heading);
     return;
   }
@@ -1007,6 +1092,14 @@ function tick(){
   $("tripFill").style.width = (prog * 100).toFixed(1) + "%"; $("tripDot").style.left = (prog * 100).toFixed(1) + "%";
   $("tripText").textContent = prog < 0.05 ? "Let's go!" : prog < 0.5 ? Math.round(prog * 100) + "% of the way" : prog < 0.85 ? "More than halfway! " + Math.round(prog * 100) + "%" : "Almost there!";
   $("tmark").style.transform = "rotate(" + b + "deg)"; $("tmark").style.transformOrigin = "100px 100px";
+  var ot = $("onTime"), tm = toMin(target.time);
+  if (tm != null && onToday(target) && d < 2000){
+    var walk = Math.max(1, Math.ceil(d / 1.1 / 60)), left = tm - minutesNow();
+    ot.hidden = left < -15;
+    ot.className = "ontime " + (left - walk >= 2 ? "good" : left - walk >= 0 ? "warn" : "bad");
+    ot.textContent = left - walk >= 2 ? "You'll make it! " + walk + " min walk, class in " + left + " min"
+      : left >= 0 ? "Hurry! Class starts in " + left + " min" : "Class already started. Go straight there!";
+  } else ot.hidden = true;
   $("distBig").textContent = d >= 1000 ? (d/1000).toFixed(1) + " km" : Math.round(d) + " m";
   $("distSteps").textContent = d > 400 ? "that's far, check you picked the right school spot" : stepsText(d);
 
@@ -1019,6 +1112,8 @@ function tick(){
     $("dial").classList.remove("nocompass");
     words = turnWords(rel);
     var on = Math.abs(rel) < 15 && acc <= d;
+    if (on && !wasOn && now - lastOnAt > 3000){ lastOnAt = now; buzz(40); chime([784, 1047]); }
+    wasOn = on;
     $("dial").classList.toggle("ontarget", on); $("say").classList.toggle("ontarget", on);
   } else {
     // No heading at all: point relative to north and say the direction in words.
@@ -1072,6 +1167,40 @@ $("demoTurn").addEventListener("input", function(){ demoHeading = +this.value; h
 $("demoStep").addEventListener("click", function(){
   if (!here) return; var p = offsetPoint(here, 3, demoHeading); here = { lat: p.lat, lon: p.lon, acc: 5 };
 });
+
+/* ---------- arrow skins ---------- */
+var SKINS = [["needle","Needle"],["rocket","Rocket"],["plane","Paper plane"]];
+function applySkin(){
+  document.querySelectorAll("#arrow .skin").forEach(function(g){
+    if (g.getAttribute("data-skin") === prefs.skin) g.removeAttribute("hidden"); else g.setAttribute("hidden", "");
+  });
+  document.querySelectorAll(".skin-btn").forEach(function(b){ b.setAttribute("aria-checked", b.dataset.skin === prefs.skin ? "true" : "false"); });
+}
+$("skinPick").innerHTML = SKINS.map(function(k){
+  var g = document.querySelector('#arrow .skin[data-skin="' + k[0] + '"]');
+  return '<button class="skin-btn" role="radio" data-skin="' + k[0] + '"><svg viewBox="40 20 120 140" aria-hidden="true">' + g.innerHTML + '</svg>' + k[1] + '</button>';
+}).join("");
+$("skinPick").addEventListener("click", function(e){
+  var b = e.target.closest(".skin-btn"); if (!b) return;
+  prefs.skin = b.dataset.skin; savePrefs(); applySkin(); toast(b.textContent + " picked");
+});
+applySkin();
+
+/* ---------- sounds ---------- */
+var actx = null;
+function audioOn(){ try{ actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === "suspended") actx.resume(); }catch(e){} }
+function chime(notes){
+  if (!speak || !actx) return;
+  var t = actx.currentTime;
+  notes.forEach(function(f, i){
+    var o = actx.createOscillator(), g = actx.createGain();
+    o.type = "triangle"; o.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, t + i * 0.11); g.gain.exponentialRampToValueAtTime(0.25, t + i * 0.11 + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.11 + 0.35);
+    o.connect(g); g.connect(actx.destination); o.start(t + i * 0.11); o.stop(t + i * 0.11 + 0.4);
+  });
+}
+function buzz(p){ if (navigator.vibrate) try{ navigator.vibrate(p); }catch(e){} }
 
 /* ---------- dial ticks ---------- */
 (function(){
