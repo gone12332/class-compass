@@ -1409,7 +1409,9 @@ function track(kind, src){
   try{
     fetch(CFG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/cc_track", {
       method: "POST", keepalive: true,
-      headers: { "Content-Type": "application/json", apikey: CFG.supabaseAnonKey, Authorization: "Bearer " + CFG.supabaseAnonKey },
+      // New sb_publishable_ keys go only in apikey; old anon JWT keys also go in Authorization.
+      headers: Object.assign({ "Content-Type": "application/json", apikey: CFG.supabaseAnonKey },
+        /^eyJ/.test(CFG.supabaseAnonKey) ? { Authorization: "Bearer " + CFG.supabaseAnonKey } : {}),
       body: JSON.stringify({ p_device: deviceId(), p_kind: kind, p_src: src || null, p_platform: platform() })
     }).then(function(r){ return r.ok ? r.json() : null; }).then(function(res){
       if (!res || !res.ok) return;

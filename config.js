@@ -4,5 +4,5 @@
 // Leave both empty to turn stats off.
 window.CC_CONFIG = {
   supabaseUrl: "https://qjtvrrikqddfjheetxyp.supabase.co",
-  supabaseAnonKey: ""
+  supabaseAnonKey: "sb_publishable_TBbvDwHxtPw3XSJkFnZ0NQ_AhVxgXLk"
 };
