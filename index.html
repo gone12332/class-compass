@@ -25,6 +25,7 @@
   --chalk-dim:#b9c7bf;  /* secondary text */
   --yellow:#f6d55c;     /* the arrow, primary action */
   --yellow-ink:#2a2610; /* text on yellow */
+  --yellow-deep:#c39a2c; /* shaded side of the needle, button lip */
   --good:#7ee0a1;       /* arrived */
   --warn:#ffb36b;       /* weak signal */
   --bad:#ff8a80;        /* error / delete */
@@ -156,6 +157,80 @@ code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9r
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--chalk);color:var(--board);padding:12px 18px;border-radius:999px;font-weight:700;z-index:20;max-width:calc(100% - 32px);text-align:center}
 .confetti{position:fixed;inset:0;pointer-events:none;z-index:15}
 @media (prefers-reduced-motion:reduce){#rose,#arrow,.btn,.meter>i{transition:none}}
+
+/* ---------- look & feel v2 ---------- */
+body{
+  background-color:var(--board);
+  background-image:
+    radial-gradient(140% 70% at 50% -15%, rgba(120,190,165,.16), transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+section:not([hidden]){animation:rise .28s ease both}
+@keyframes rise{from{opacity:.001;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.btn{box-shadow:0 4px 0 #142b25;transition:transform .08s ease, box-shadow .08s ease}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #142b25}
+.btn.primary{box-shadow:0 5px 0 var(--yellow-deep),0 12px 24px rgba(0,0,0,.28)}
+.btn.primary:active{box-shadow:0 2px 0 var(--yellow-deep)}
+.btn.ghost{box-shadow:none;border-style:dashed}
+.btn.danger{box-shadow:none}
+.iconbtn{box-shadow:0 3px 0 #142b25}
+.iconbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #142b25}
+
+h1{font-size:2rem;letter-spacing:-.01em}
+.greet{font-family:var(--display);font-weight:500;font-size:1.3rem;color:var(--chalk-dim)}
+.greet span{color:var(--chalk)}
+.section-label{font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--chalk-dim);font-family:var(--body);font-weight:700;margin-top:4px}
+
+.hero{
+  display:flex;flex-direction:column;gap:6px;text-align:left;width:100%;
+  padding:20px;border-radius:24px;border:0;color:var(--yellow-ink);
+  background:linear-gradient(160deg,#ffe58a 0%,var(--yellow) 55%,#f0c94a 100%);
+  box-shadow:0 6px 0 var(--yellow-deep),0 16px 30px rgba(0,0,0,.3);
+  transition:transform .08s ease, box-shadow .08s ease;
+}
+.hero:active{transform:translateY(4px);box-shadow:0 2px 0 var(--yellow-deep)}
+.hero .pill{background:var(--yellow-ink);color:var(--yellow);margin:0}
+.hero-top{display:flex;align-items:center;gap:10px;font-weight:700;flex-wrap:wrap}
+.hero-name{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.05;overflow-wrap:anywhere}
+.hero-note{font-size:1rem;opacity:.85;overflow-wrap:anywhere}
+.hero-note:empty{display:none}
+.hero-go{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;margin-top:6px;padding:10px 18px;border-radius:999px;background:var(--yellow-ink);color:var(--yellow);font-family:var(--display);font-weight:600;font-size:1.1rem}
+
+.class{box-shadow:0 4px 0 #142b25;transition:transform .08s ease, box-shadow .08s ease;border-color:transparent;background:linear-gradient(180deg,#2a5146,var(--board-2))}
+.class:active{transform:translateY(3px);box-shadow:0 1px 0 #142b25}
+.class.next{border-color:var(--yellow)}
+.badge{width:54px;height:54px;border-radius:16px;box-shadow:inset 0 -4px 0 rgba(0,0,0,.18)}
+.class .go{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--board);font-size:0;color:var(--yellow)}
+.class .go::after{content:"";width:12px;height:12px;border-top:3.5px solid currentColor;border-right:3.5px solid currentColor;transform:translateX(-2px) rotate(45deg);border-radius:2px}
+.class .go.edit{font-size:.95rem;width:auto;padding:0 14px;border-radius:999px}
+.class .go.edit::after{display:none}
+.empty{background:rgba(0,0,0,.12)}
+
+.target-name{font-size:2.3rem}
+.dial{border:0;background:none;width:min(86vw,360px);filter:drop-shadow(0 18px 30px rgba(0,0,0,.35));border-radius:50%;transition:box-shadow .3s}
+.dial .n-light{fill:#ffe58a;transition:fill .3s}
+.dial .n-dark{fill:var(--yellow-deep);transition:fill .3s}
+.dial.ontarget .n-light{fill:#a8f0c1}
+.dial.ontarget .n-dark{fill:#3fb873}
+.dial.ontarget{box-shadow:0 0 0 6px rgba(126,224,161,.35),0 0 40px 6px rgba(126,224,161,.35);animation:pulse 1.6s ease-in-out infinite}
+.dial.arrived{box-shadow:0 0 0 6px rgba(126,224,161,.5),0 0 50px 10px rgba(126,224,161,.45)}
+@keyframes pulse{50%{box-shadow:0 0 0 12px rgba(126,224,161,.12),0 0 50px 10px rgba(126,224,161,.25)}}
+.dial.nocompass #tmark{opacity:0}
+.say{background:rgba(0,0,0,.18);border-radius:999px;padding:10px 20px;align-self:center;font-size:1.55rem;min-height:0;text-align:center}
+.say.ontarget{color:var(--good)}
+.dist .big{font-size:3.4rem}
+.trip{display:flex;flex-direction:column;gap:8px;align-items:center}
+.trip-bar{position:relative;width:min(100%,320px);height:14px;border-radius:999px;background:rgba(0,0,0,.25)}
+.trip-bar i{position:absolute;inset:0 auto 0 0;width:0;border-radius:999px;background:linear-gradient(90deg,var(--yellow-deep),var(--yellow));transition:width .6s ease}
+.trip-bar b{position:absolute;top:50%;left:0;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;background:var(--chalk);box-shadow:0 2px 6px rgba(0,0,0,.4);transition:left .6s ease}
+.chip{background:rgba(0,0,0,.18);border-color:transparent}
+.notes{background:rgba(0,0,0,.16);border-color:transparent}
+.spot,details{background:rgba(0,0,0,.14);border-color:transparent}
+input[type=text],input[type=time],textarea{background:rgba(0,0,0,.22);border-color:transparent}
+input[type=text]:focus,input[type=time]:focus,textarea:focus{border-color:var(--yellow);outline:none}
+input[type=range]{width:100%;accent-color:var(--yellow);height:36px}
+@media (prefers-reduced-motion:reduce){section:not([hidden]),.dial.ontarget{animation:none}.trip-bar i,.trip-bar b{transition:none}}
 </style>
 </head>
 <body>
@@ -188,7 +263,16 @@ code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9r
         <p>Phones only share location with pages whose address starts with <b>https://</b>. Open Class Compass from its https link instead of a saved file.</p>
       </div>
 
-      <p class="muted" id="homeLead">Pick your next class. The arrow will point the way.</p>
+      <p class="greet" id="homeLead"><span id="greet">Hi there!</span> Where are you headed?</p>
+      <button class="hero" id="nextHero" hidden>
+        <span class="hero-top"><span class="pill">Next up</span><span id="heroWhen"></span></span>
+        <span class="hero-name" id="heroName"></span>
+        <span class="hero-note" id="heroNote"></span>
+        <span class="hero-go">Take me there
+          <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M5 11h12M12 5l6 6-6 6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </button>
+      <h3 class="section-label" id="allLabel" hidden>All my classes</h3>
       <ul class="list" id="classList"></ul>
 
       <div class="empty" id="emptyState" hidden>
@@ -231,22 +315,33 @@ code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9r
 
     <div class="dial" id="dial">
       <svg viewBox="0 0 200 200" aria-hidden="true">
+        <defs>
+          <radialGradient id="face" cx="50%" cy="42%" r="60%">
+            <stop offset="0" stop-color="#2f5a4f"/><stop offset="1" stop-color="#1a352e"/>
+          </radialGradient>
+          <linearGradient id="bezel" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#3d6b5e"/><stop offset="1" stop-color="#152b25"/>
+          </linearGradient>
+          <filter id="lift" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000" flood-opacity=".45"/></filter>
+        </defs>
+        <circle cx="100" cy="100" r="98" fill="url(#bezel)"/>
+        <circle cx="100" cy="100" r="90" fill="url(#face)"/>
         <g id="rose" style="transform-origin:100px 100px">
-          <g stroke="#b9c7bf" stroke-width="2" opacity=".55">
-            <line x1="100" y1="8" x2="100" y2="18"/><line x1="100" y1="182" x2="100" y2="192"/>
-            <line x1="8" y1="100" x2="18" y2="100"/><line x1="182" y1="100" x2="192" y2="100"/>
-          </g>
-          <text x="100" y="34" text-anchor="middle" font-family="Fredoka,system-ui,sans-serif" font-weight="700" font-size="17" fill="#ff8a80">N</text>
-          <text x="100" y="178" text-anchor="middle" font-family="Fredoka,system-ui,sans-serif" font-size="13" fill="#b9c7bf">S</text>
-          <text x="172" y="105" text-anchor="middle" font-family="Fredoka,system-ui,sans-serif" font-size="13" fill="#b9c7bf">E</text>
-          <text x="28" y="105" text-anchor="middle" font-family="Fredoka,system-ui,sans-serif" font-size="13" fill="#b9c7bf">W</text>
+          <g id="ticks"></g>
+          <g id="tmark"><circle cx="100" cy="17" r="6.5" fill="#f6d55c" stroke="#1d3b34" stroke-width="2.5"/></g>
+          <text x="100" y="41" text-anchor="middle" font-family="Fredoka,system-ui,sans-serif" font-weight="700" font-size="16" fill="#ff8a80">N</text>
+          <text x="100" y="170" text-anchor="middle" font-family="Fredoka,system-ui,sans-serif" font-weight="600" font-size="12" fill="#b9c7bf">S</text>
+          <text x="165" y="104.5" text-anchor="middle" font-family="Fredoka,system-ui,sans-serif" font-weight="600" font-size="12" fill="#b9c7bf">E</text>
+          <text x="35" y="104.5" text-anchor="middle" font-family="Fredoka,system-ui,sans-serif" font-weight="600" font-size="12" fill="#b9c7bf">W</text>
         </g>
-        <g id="arrow">
-          <path d="M100 30 L138 120 L100 102 L62 120 Z" fill="#f6d55c" stroke="#2a2610" stroke-width="3" stroke-linejoin="round"/>
-          <circle cx="100" cy="100" r="6" fill="#2a2610"/>
+        <g id="arrow" filter="url(#lift)">
+          <path class="n-light" d="M100 34 L100 108 L66 132 Z"/>
+          <path class="n-dark" d="M100 34 L134 132 L100 108 Z"/>
+          <path d="M100 34 L134 132 L100 108 L66 132 Z" fill="none" stroke="#2a2610" stroke-width="2.5" stroke-linejoin="round"/>
+          <circle cx="100" cy="100" r="7" fill="#2a2610"/><circle cx="100" cy="100" r="3" fill="#f3f1e7"/>
         </g>
         <g id="star" hidden>
-          <path d="M100 42 L115 82 L158 84 L124 110 L136 152 L100 128 L64 152 L76 110 L42 84 L85 82 Z" fill="#7ee0a1" stroke="#1d3b34" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M100 42 L115 82 L158 84 L124 110 L136 152 L100 128 L64 152 L76 110 L42 84 L85 82 Z" fill="#7ee0a1" stroke="#1d3b34" stroke-width="3" stroke-linejoin="round" filter="url(#lift)"/>
         </g>
       </svg>
     </div>
@@ -256,6 +351,10 @@ code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9r
     <div class="dist">
       <span class="big" id="distBig">--</span>
       <span class="steps muted" id="distSteps">&nbsp;</span>
+    </div>
+    <div class="trip" id="trip" hidden>
+      <div class="trip-bar"><i id="tripFill"></i><b id="tripDot"></b></div>
+      <span class="small muted" id="tripText"></span>
     </div>
 
     <div class="status">
@@ -487,15 +586,27 @@ function classRow(c, isNext, action){
   var meta = [];
   if (c.time) meta.push(fmtTime(c.time));
   if (c.floor) meta.push("Floor " + c.floor);
-  return '<li><button class="class' + (isNext ? ' next' : '') + '" data-id="' + esc(c.id) + '" data-act="' + action + '">' +
+  return '<li><button class="class' + (isNext ? ' next' : '') + '" data-id="' + esc(c.id) + '" data-act="' + action + '" aria-label="' + esc((action === "go" ? "Go to " : "Edit ") + c.name) + '">' +
     '<span class="badge" style="background:' + esc(c.color || COLORS[0]) + '">' + esc(initials(c.name)) + '</span>' +
     '<span class="text">' + (isNext ? '<span class="pill">Next up</span><br>' : '') +
     '<span class="name">' + esc(c.name) + '</span>' + (meta.length ? '<br><span class="meta">' + esc(meta.join(" · ")) + '</span>' : '') + '</span>' +
-    '<span class="go">' + (action === "go" ? "Go" : "Edit") + '</span></button></li>';
+    (action === "go" ? '<span class="go" aria-hidden="true"></span>' : '<span class="go edit">Edit</span>') + '</button></li>';
 }
 function renderHome(){
-  var next = nextClassId();
-  $("classList").innerHTML = sortedClasses().map(function(c){ return classRow(c, c.id === next, "go"); }).join("");
+  var next = nextClassId(), h = new Date().getHours();
+  $("greet").textContent = h < 12 ? "Good morning!" : h < 17 ? "Good afternoon!" : "Hi there!";
+  var nc = classes.find(function(c){ return c.id === next; });
+  $("nextHero").hidden = !nc;
+  if (nc){
+    $("nextHero").dataset.id = nc.id;
+    var mins = toMin(nc.time) - minutesNow();
+    $("heroWhen").textContent = mins > 0 ? "Starts in " + (mins >= 60 ? Math.floor(mins/60) + " h " + (mins % 60) + " min" : mins + " min") : "Starting now";
+    $("heroName").textContent = nc.name;
+    $("heroNote").textContent = [nc.floor ? "Floor " + nc.floor : "", nc.notes || ""].filter(Boolean).join(" · ");
+  }
+  var rest = sortedClasses().filter(function(c){ return c.id !== next; });
+  $("allLabel").hidden = !(nc && rest.length);
+  $("classList").innerHTML = rest.map(function(c){ return classRow(c, false, "go"); }).join("");
   $("emptyState").hidden = classes.length > 0;
   $("homeLead").hidden = classes.length === 0;
   $("secureBanner").hidden = secure;
@@ -505,6 +616,9 @@ $("classList").addEventListener("click", function(e){
   var c = classes.find(function(x){ return x.id === b.dataset.id; }); if (c) openCompass(c, false);
 });
 $("addBtn").addEventListener("click", function(){ openEdit(null); });
+$("nextHero").addEventListener("click", function(){
+  var c = classes.find(function(x){ return x.id === $("nextHero").dataset.id; }); if (c) openCompass(c, false);
+});
 $("menuBtn").addEventListener("click", openMenu);
 $("demoBtn").addEventListener("click", startDemo);
 
@@ -682,13 +796,14 @@ $("delYes").addEventListener("click", function(){
 });
 
 /* ---------- compass ---------- */
-var target = null, demo = false, here = null, geoWatch = null;
+var tripStart = null, target = null, demo = false, here = null, geoWatch = null;
 var heading = null, headingSrc = null, hx = 0, hy = 0, lastOrientAt = 0, iosAcc = null, tilt = 0;
 var shownArrow = 0, shownRose = 0, arrivedOnce = false, wakeLock = null, raf = null, started = false;
 var speak = false, lastSpoken = "", lastSpokenAt = 0;
 try{ speak = localStorage.getItem(KEY + ".speak") === "1"; }catch(e){}
 
 function openCompass(c, isDemo){
+  tripStart = null; $("trip").hidden = true; $("dial").classList.remove("ontarget"); $("say").classList.remove("ontarget");
   target = c; demo = isDemo; here = null; fixAt = 0; walkAt = 0; tipLocked = false; $("arrow").style.opacity = 1; heading = null; headingSrc = null; arrivedOnce = false; started = false;
   $("targetName").textContent = c.name;
   $("notesBody").textContent = c.notes || "";
@@ -877,7 +992,7 @@ function tick(){
 
   if (d <= arriveR){
     if (!arrivedOnce){ arrivedOnce = true; celebrate(); say("You made it to " + target.name + "!"); }
-    $("dial").classList.add("arrived"); $("arrow").setAttribute("hidden",""); $("star").removeAttribute("hidden");
+    $("dial").classList.add("arrived"); $("dial").classList.remove("ontarget"); $("arrow").setAttribute("hidden",""); $("trip").hidden = true; $("star").removeAttribute("hidden");
     setSay("You're here! Look for the room sign.", true);
     $("distBig").textContent = Math.round(d) + " m"; $("distSteps").textContent = "right around here";
     shownRose = rotate($("rose"), shownRose, heading == null ? 0 : -heading);
@@ -886,6 +1001,12 @@ function tick(){
   if (arrivedOnce && d > arriveR + 8) arrivedOnce = false;
   $("dial").classList.remove("arrived"); $("star").setAttribute("hidden",""); $("arrow").removeAttribute("hidden");
 
+  if (tripStart == null || d > tripStart) tripStart = Math.max(d, arriveR + 1);
+  var prog = Math.max(0, Math.min(1, (tripStart - d) / (tripStart - arriveR)));
+  $("trip").hidden = tripStart < arriveR + 10;
+  $("tripFill").style.width = (prog * 100).toFixed(1) + "%"; $("tripDot").style.left = (prog * 100).toFixed(1) + "%";
+  $("tripText").textContent = prog < 0.05 ? "Let's go!" : prog < 0.5 ? Math.round(prog * 100) + "% of the way" : prog < 0.85 ? "More than halfway! " + Math.round(prog * 100) + "%" : "Almost there!";
+  $("tmark").style.transform = "rotate(" + b + "deg)"; $("tmark").style.transformOrigin = "100px 100px";
   $("distBig").textContent = d >= 1000 ? (d/1000).toFixed(1) + " km" : Math.round(d) + " m";
   $("distSteps").textContent = d > 400 ? "that's far, check you picked the right school spot" : stepsText(d);
 
@@ -897,11 +1018,13 @@ function tick(){
     shownRose = rotate($("rose"), shownRose, -heading);
     $("dial").classList.remove("nocompass");
     words = turnWords(rel);
+    var on = Math.abs(rel) < 15 && acc <= d;
+    $("dial").classList.toggle("ontarget", on); $("say").classList.toggle("ontarget", on);
   } else {
     // No heading at all: point relative to north and say the direction in words.
     shownArrow = rotate($("arrow"), shownArrow, b);
     shownRose = rotate($("rose"), shownRose, 0);
-    $("dial").classList.add("nocompass");
+    $("dial").classList.add("nocompass"); $("dial").classList.remove("ontarget"); $("say").classList.remove("ontarget");
     words = "Head " + cardinal(b) + ". Start walking and the arrow will follow you.";
   }
   if (acc > d * 1.5 && d < 40) words = "You're close! Look around for the sign.";
@@ -949,6 +1072,18 @@ $("demoTurn").addEventListener("input", function(){ demoHeading = +this.value; h
 $("demoStep").addEventListener("click", function(){
   if (!here) return; var p = offsetPoint(here, 3, demoHeading); here = { lat: p.lat, lon: p.lon, acc: 5 };
 });
+
+/* ---------- dial ticks ---------- */
+(function(){
+  var g = "", i;
+  for (i = 0; i < 360; i += 5){
+    if (i % 90 === 0) continue;
+    var big = i % 30 === 0, r1 = big ? 78 : 82, r2 = 88, a = toRad(i);
+    g += '<line x1="' + (100 + r1*Math.sin(a)).toFixed(2) + '" y1="' + (100 - r1*Math.cos(a)).toFixed(2) + '" x2="' + (100 + r2*Math.sin(a)).toFixed(2) + '" y2="' + (100 - r2*Math.cos(a)).toFixed(2) +
+         '" stroke="#b9c7bf" stroke-opacity="' + (big ? .8 : .35) + '" stroke-width="' + (big ? 2 : 1.2) + '" stroke-linecap="round"/>';
+  }
+  $("ticks").innerHTML = g;
+})();
 
 /* ---------- boot ---------- */
 renderHome();
