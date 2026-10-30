@@ -1,0 +1,932 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1d3b34">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Class Compass">
+<title>Class Compass</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: one column, phone first. A chalkboard with a chalk-yellow arrow. */
+:root{
+  --board:#1d3b34;      /* chalkboard green */
+  --board-2:#25483f;    /* raised panel */
+  --board-3:#2f574c;    /* pressed / border */
+  --chalk:#f3f1e7;      /* chalk white text */
+  --chalk-dim:#b9c7bf;  /* secondary text */
+  --yellow:#f6d55c;     /* the arrow, primary action */
+  --yellow-ink:#2a2610; /* text on yellow */
+  --good:#7ee0a1;       /* arrived */
+  --warn:#ffb36b;       /* weak signal */
+  --bad:#ff8a80;        /* error / delete */
+  --display:"Fredoka","Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --r:18px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--board);color:var(--chalk);
+  font:17px/1.45 var(--body);
+  -webkit-tap-highlight-color:transparent;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+[hidden]{display:none!important}
+.wrap{
+  max-width:520px;margin:0 auto;min-height:100%;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:16px 28px;
+  display:flex;flex-direction:column;gap:18px;
+}
+h1,h2,h3{font-family:var(--display);font-weight:600;margin:0;text-wrap:balance;line-height:1.15}
+h1{font-size:1.9rem}
+h2{font-size:1.45rem}
+p{margin:0}
+.muted{color:var(--chalk-dim)}
+.small{font-size:.9rem}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+
+/* Buttons */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  min-height:56px;padding:12px 20px;border-radius:999px;border:2px solid var(--board-3);
+  background:var(--board-2);font-family:var(--display);font-weight:600;font-size:1.1rem;
+  transition:transform .08s ease;
+}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--yellow);color:var(--yellow-ink);border-color:var(--yellow)}
+.btn.danger{border-color:var(--bad);color:var(--bad);background:transparent}
+.btn.ghost{background:transparent}
+.btn.wide{width:100%}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>.btn{flex:1 1 140px}
+
+/* Header */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand svg{flex:none}
+.iconbtn{width:52px;height:52px;border-radius:50%;border:2px solid var(--board-3);background:var(--board-2);display:grid;place-items:center;flex:none}
+
+/* Class list */
+.list{display:flex;flex-direction:column;gap:12px;list-style:none;margin:0;padding:0}
+.class{
+  display:grid;grid-template-columns:52px 1fr auto;align-items:center;gap:14px;
+  width:100%;text-align:left;padding:14px 14px 14px 12px;border-radius:var(--r);
+  background:var(--board-2);border:2px solid var(--board-3);min-height:76px;
+}
+.class.next{border-color:var(--yellow)}
+.badge{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:1.25rem;color:var(--yellow-ink)}
+.class .name{font-family:var(--display);font-weight:600;font-size:1.25rem;line-height:1.2}
+.class .meta{color:var(--chalk-dim);font-size:.92rem}
+.class .go{font-family:var(--display);font-weight:600;color:var(--yellow);font-size:1.05rem;white-space:nowrap}
+.class .text{min-width:0}
+.class .name,.class .meta{overflow-wrap:anywhere}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;background:var(--yellow);color:var(--yellow-ink);font-size:.78rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px}
+.empty{border:2px dashed var(--board-3);border-radius:var(--r);padding:22px;display:flex;flex-direction:column;gap:12px}
+.empty ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:6px}
+
+.banner{border-radius:var(--r);padding:14px 16px;background:var(--board-2);border:2px solid var(--yellow);display:flex;flex-direction:column;gap:10px}
+.banner.warn{border-color:var(--warn)}
+.banner.bad{border-color:var(--bad)}
+
+/* Compass screen */
+.compass-screen{display:flex;flex-direction:column;gap:16px;align-items:stretch}
+.target-name{font-size:2.1rem;text-align:center}
+.dial{
+  position:relative;width:min(84vw,360px);aspect-ratio:1;max-width:100%;margin:0 auto;
+  border-radius:50%;background:radial-gradient(circle at 50% 50%,var(--board-2) 0 62%,var(--board) 63%);
+  border:3px solid var(--board-3);
+}
+.dial.arrived{border-color:var(--good)}
+.dial svg{position:absolute;inset:0;width:100%;height:100%}
+#rose{transition:transform .25s linear}
+#arrow{transition:transform .25s linear;transform-origin:50% 50%}
+.dial.nocompass #arrow{opacity:.95}
+.dist{text-align:center;display:flex;flex-direction:column;gap:2px}
+.dist .big{font-family:var(--display);font-weight:700;font-size:3rem;line-height:1;font-variant-numeric:tabular-nums}
+.dist .steps{font-size:1.15rem}
+.say{font-family:var(--display);font-weight:600;font-size:1.6rem;text-align:center;color:var(--yellow);min-height:2.2em;display:flex;align-items:center;justify-content:center}
+.say.arrived{color:var(--good)}
+.status{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 12px;background:var(--board-2);border:1px solid var(--board-3);font-size:.88rem}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--chalk-dim)}
+.dot.good{background:var(--good)}.dot.warn{background:var(--warn)}.dot.bad{background:var(--bad)}
+.notes{background:var(--board-2);border-radius:var(--r);padding:16px;border:2px solid var(--board-3);display:flex;flex-direction:column;gap:6px}
+.notes .label{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--chalk-dim)}
+.notes .body{font-size:1.15rem;white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* Form */
+form{display:flex;flex-direction:column;gap:16px}
+label{display:flex;flex-direction:column;gap:6px;font-weight:700}
+label .hint{font-weight:400;color:var(--chalk-dim);font-size:.9rem}
+input[type=text],input[type=time],textarea{
+  width:100%;min-height:54px;padding:12px 14px;border-radius:14px;border:2px solid var(--board-3);
+  background:var(--board);font-size:1.1rem;
+}
+textarea{min-height:96px;resize:vertical}
+.spot{border-radius:var(--r);background:var(--board-2);border:2px solid var(--board-3);padding:16px;display:flex;flex-direction:column;gap:12px}
+.spot .state{display:flex;align-items:center;gap:10px;font-weight:700}
+.meter{height:10px;border-radius:999px;background:var(--board);overflow:hidden}
+.meter>i{display:block;height:100%;width:0;background:var(--yellow);transition:width .3s}
+.colors{display:flex;gap:10px;flex-wrap:wrap}
+.colors input{position:absolute;opacity:0;pointer-events:none}
+.colors label{flex-direction:row}
+.swatch{width:44px;height:44px;border-radius:12px;border:3px solid transparent;display:block}
+.colors input:checked+.swatch{border-color:var(--chalk)}
+.colors input:focus-visible+.swatch{outline:3px solid var(--yellow);outline-offset:2px}
+details{background:var(--board-2);border-radius:var(--r);border:2px solid var(--board-3);padding:12px 16px}
+details summary{cursor:pointer;font-weight:700;min-height:32px;display:flex;align-items:center}
+details[open]{display:flex;flex-direction:column;gap:12px}
+code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9rem;overflow-wrap:anywhere}
+.sharebox{width:100%;min-height:90px;font-family:ui-monospace,Menlo,monospace;font-size:.8rem}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--chalk);color:var(--board);padding:12px 18px;border-radius:999px;font-weight:700;z-index:20;max-width:calc(100% - 32px);text-align:center}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:15}
+@media (prefers-reduced-motion:reduce){#rose,#arrow,.btn,.meter>i{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+
+  <!-- HOME -->
+  <section id="home" class="home" aria-labelledby="homeTitle">
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <div class="top">
+        <div class="brand">
+          <svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="20" fill="none" stroke="#f6d55c" stroke-width="3"/><path d="M22 7 L29 27 L22 23 L15 27 Z" fill="#f6d55c"/></svg>
+          <h1 id="homeTitle">Class Compass</h1>
+        </div>
+        <button class="iconbtn" id="menuBtn" aria-label="Settings and sharing">
+          <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2.2" fill="currentColor"/><circle cx="12" cy="12" r="2.2" fill="currentColor"/><circle cx="19" cy="12" r="2.2" fill="currentColor"/></svg>
+        </button>
+      </div>
+
+      <div id="importBanner" class="banner" hidden>
+        <h3 id="importTitle">Add shared classes?</h3>
+        <p id="importText" class="muted"></p>
+        <div class="row">
+          <button class="btn primary" id="importYes">Add them</button>
+          <button class="btn ghost" id="importNo">No thanks</button>
+        </div>
+      </div>
+
+      <div id="secureBanner" class="banner bad" hidden>
+        <h3>This page needs a secure link</h3>
+        <p>Phones only share location with pages whose address starts with <b>https://</b>. Open Class Compass from its https link instead of a saved file.</p>
+      </div>
+
+      <p class="muted" id="homeLead">Pick your next class. The arrow will point the way.</p>
+      <ul class="list" id="classList"></ul>
+
+      <div class="empty" id="emptyState" hidden>
+        <h2>Add your first class</h2>
+        <ol>
+          <li>Walk to the classroom door.</li>
+          <li>Tap <b>Add a class</b> and type its name, like "Room 12 Math".</li>
+          <li>Tap <b>Save this spot</b> and hold still for a few seconds.</li>
+        </ol>
+        <p class="muted small">Do this once for each class. A grown-up can also set them up and send you a link.</p>
+      </div>
+
+      <button class="btn primary wide" id="addBtn">
+        <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 3v16M3 11h16" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+        Add a class
+      </button>
+      <button class="btn ghost wide" id="demoBtn">Try a practice walk</button>
+    </div>
+  </section>
+
+  <!-- COMPASS -->
+  <section id="compass" class="compass-screen" hidden aria-live="polite">
+    <div class="top">
+      <button class="iconbtn" id="backBtn" aria-label="Back to my classes">
+        <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4 L7 12 L15 20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <span class="chip" id="demoChip" hidden>Practice walk</span>
+      <button class="iconbtn" id="soundBtn" aria-label="Turn spoken directions on" aria-pressed="false">
+        <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path id="soundWaves" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".35"/></svg>
+      </button>
+    </div>
+
+    <h2 class="target-name" id="targetName">Room</h2>
+
+    <div id="startBox" class="banner">
+      <h3>Ready to go?</h3>
+      <p class="muted">Tap start, then say <b>Allow</b> when your phone asks about location and motion.</p>
+      <button class="btn primary wide" id="startBtn">Start the compass</button>
+    </div>
+
+    <div class="dial" id="dial">
+      <svg viewBox="0 0 200 200" aria-hidden="true">
+        <g id="rose" style="transform-origin:100px 100px">
+          <g stroke="#b9c7bf" stroke-width="2" opacity=".55">
+            <line x1="100" y1="8" x2="100" y2="18"/><line x1="100" y1="182" x2="100" y2="192"/>
+            <line x1="8" y1="100" x2="18" y2="100"/><line x1="182" y1="100" x2="192" y2="100"/>
+          </g>
+          <text x="100" y="34" text-anchor="middle" font-family="Fredoka,system-ui,sans-serif" font-weight="700" font-size="17" fill="#ff8a80">N</text>
+          <text x="100" y="178" text-anchor="middle" font-family="Fredoka,system-ui,sans-serif" font-size="13" fill="#b9c7bf">S</text>
+          <text x="172" y="105" text-anchor="middle" font-family="Fredoka,system-ui,sans-serif" font-size="13" fill="#b9c7bf">E</text>
+          <text x="28" y="105" text-anchor="middle" font-family="Fredoka,system-ui,sans-serif" font-size="13" fill="#b9c7bf">W</text>
+        </g>
+        <g id="arrow">
+          <path d="M100 30 L138 120 L100 102 L62 120 Z" fill="#f6d55c" stroke="#2a2610" stroke-width="3" stroke-linejoin="round"/>
+          <circle cx="100" cy="100" r="6" fill="#2a2610"/>
+        </g>
+        <g id="star" hidden>
+          <path d="M100 42 L115 82 L158 84 L124 110 L136 152 L100 128 L64 152 L76 110 L42 84 L85 82 Z" fill="#7ee0a1" stroke="#1d3b34" stroke-width="3" stroke-linejoin="round"/>
+        </g>
+      </svg>
+    </div>
+
+    <p class="say" id="say">Getting ready…</p>
+
+    <div class="dist">
+      <span class="big" id="distBig">--</span>
+      <span class="steps muted" id="distSteps">&nbsp;</span>
+    </div>
+
+    <div class="status">
+      <span class="chip"><span class="dot" id="gpsDot"></span><span id="gpsText">Location: waiting</span></span>
+      <span class="chip"><span class="dot" id="cmpDot"></span><span id="cmpText">Compass: waiting</span></span>
+    </div>
+
+    <div id="tipBox" class="banner warn" hidden>
+      <p id="tipText"></p>
+    </div>
+
+    <div class="notes" id="notesBox" hidden>
+      <span class="label">How to get there</span>
+      <span class="body" id="notesBody"></span>
+    </div>
+
+    <div id="demoControls" class="spot" hidden>
+      <label for="demoTurn">Turn the phone (practice)
+        <input type="range" id="demoTurn" min="0" max="359" value="0">
+      </label>
+      <div class="row">
+        <button class="btn" id="demoStep">Take 5 steps forward</button>
+      </div>
+      <p class="muted small">Point the arrow straight up, then walk. On a real phone you just turn and walk.</p>
+    </div>
+
+    <p class="muted small" style="text-align:center">GPS inside a school can be off by 5 to 20 meters. When you get close, look for the room sign and read the notes.</p>
+  </section>
+
+  <!-- EDIT -->
+  <section id="edit" hidden aria-labelledby="editTitle">
+    <form id="form" novalidate>
+      <div class="top">
+        <button type="button" class="iconbtn" id="editBack" aria-label="Cancel">
+          <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4 L7 12 L15 20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <h2 id="editTitle" style="flex:1">Add a class</h2>
+      </div>
+
+      <label for="fName">Class name
+        <span class="hint">Like "Room 12 Math" or "Gym"</span>
+        <input type="text" id="fName" maxlength="40" autocomplete="off" required>
+      </label>
+
+      <div class="spot">
+        <div class="state"><span class="dot" id="spotDot"></span><span id="spotState">No spot saved yet</span></div>
+        <div class="meter" id="spotMeter" hidden><i id="spotBar"></i></div>
+        <p class="muted small" id="spotHelp">Stand at the classroom door, then tap the button. Hold still while it listens.</p>
+        <button type="button" class="btn primary wide" id="spotBtn">Save this spot</button>
+      </div>
+
+      <label for="fNotes">How to get there
+        <span class="hint">Words help when GPS is fuzzy: "2nd floor, up the blue stairs, 3rd door on the left"</span>
+        <textarea id="fNotes" maxlength="300"></textarea>
+      </label>
+
+      <div class="row">
+        <label for="fTime" style="flex:1 1 140px">Class starts at <span class="hint">Optional</span>
+          <input type="time" id="fTime">
+        </label>
+        <label for="fFloor" style="flex:1 1 140px">Floor <span class="hint">Optional</span>
+          <input type="text" id="fFloor" maxlength="12" inputmode="text">
+        </label>
+      </div>
+
+      <fieldset style="border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:8px">
+        <legend style="font-weight:700;margin-bottom:8px">Color</legend>
+        <div class="colors" id="colorPick"></div>
+      </fieldset>
+
+      <details>
+        <summary>Type the spot in instead</summary>
+        <label for="fCoords">Latitude, longitude
+          <span class="hint">Copy from a map app, like 40.7128, -74.0060</span>
+          <input type="text" id="fCoords" inputmode="decimal" autocomplete="off">
+        </label>
+      </details>
+
+      <p class="banner bad" id="formErr" role="alert" hidden></p>
+
+      <button type="submit" class="btn primary wide">Save class</button>
+      <button type="button" class="btn danger wide" id="delBtn" hidden>Delete this class</button>
+      <div class="banner bad" id="delConfirm" hidden>
+        <p>Delete this class for good?</p>
+        <div class="row"><button type="button" class="btn danger" id="delYes">Yes, delete</button><button type="button" class="btn ghost" id="delNo">Keep it</button></div>
+      </div>
+    </form>
+  </section>
+
+  <!-- MENU -->
+  <section id="menu" hidden aria-labelledby="menuTitle" style="display:flex;flex-direction:column;gap:18px">
+    <div class="top">
+      <button class="iconbtn" id="menuBack" aria-label="Back">
+        <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4 L7 12 L15 20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <h2 id="menuTitle" style="flex:1">Share and settings</h2>
+    </div>
+
+    <div class="spot">
+      <h3>Share my classes</h3>
+      <p class="muted">Send this link to another phone. Opening it adds the same classes there. Great for a teacher or parent setting things up.</p>
+      <textarea class="sharebox" id="shareLink" readonly aria-label="Share link"></textarea>
+      <div class="row">
+        <button class="btn primary" id="copyLink">Copy link</button>
+        <button class="btn" id="nativeShare" hidden>Share…</button>
+      </div>
+    </div>
+
+    <div class="spot">
+      <h3>Edit a class</h3>
+      <ul class="list" id="editList"></ul>
+    </div>
+
+    <div class="spot">
+      <h3>Tips for a good arrow</h3>
+      <ul style="margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px">
+        <li>Hold the phone flat, like a plate.</li>
+        <li>If the arrow spins or looks wrong, wave the phone in a figure 8 a few times.</li>
+        <li>Stay away from metal lockers and big speakers for a second. They confuse the compass.</li>
+        <li>Save spots near windows or doors. GPS works better there.</li>
+        <li>On iPhone, tap <b>Share</b> then <b>Add to Home Screen</b> to keep it like an app.</li>
+      </ul>
+    </div>
+
+    <button class="btn danger wide" id="wipeBtn">Remove all classes</button>
+    <div class="banner bad" id="wipeConfirm" hidden>
+      <p>Remove every class from this phone?</p>
+      <div class="row"><button class="btn danger" id="wipeYes">Yes, remove all</button><button class="btn ghost" id="wipeNo">Keep them</button></div>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+<canvas class="confetti" id="confetti" hidden></canvas>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- storage ---------- */
+var KEY = "classCompass.v1";
+var COLORS = ["#f6d55c","#7ee0a1","#8fc7ff","#ffb36b","#f5a3d0","#c7b3ff"];
+function load(){
+  try{ var d = JSON.parse(localStorage.getItem(KEY) || "[]"); return Array.isArray(d) ? d.filter(validClass) : []; }
+  catch(e){ return []; }
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(classes)); return true; }
+  catch(e){ toast("Could not save on this phone. Private browsing may block saving."); return false; }
+}
+function validClass(c){
+  return c && typeof c.name === "string" && isFinite(c.lat) && isFinite(c.lon) &&
+    Math.abs(c.lat) <= 90 && Math.abs(c.lon) <= 180;
+}
+var classes = load();
+
+/* ---------- helpers ---------- */
+var $ = function(id){ return document.getElementById(id); };
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function toRad(d){ return d * Math.PI / 180; }
+function toDeg(r){ return r * 180 / Math.PI; }
+function norm360(a){ a %= 360; return a < 0 ? a + 360 : a; }
+function norm180(a){ a = norm360(a); return a > 180 ? a - 360 : a; }
+function distanceM(a, b){
+  var R = 6371000, dLat = toRad(b.lat - a.lat), dLon = toRad(b.lon - a.lon);
+  var s = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.sin(dLon/2)*Math.sin(dLon/2);
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(s)));
+}
+function bearingDeg(a, b){
+  var y = Math.sin(toRad(b.lon - a.lon)) * Math.cos(toRad(b.lat));
+  var x = Math.cos(toRad(a.lat))*Math.sin(toRad(b.lat)) - Math.sin(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.cos(toRad(b.lon - a.lon));
+  return norm360(toDeg(Math.atan2(y, x)));
+}
+function offsetPoint(p, meters, bearing){
+  var R = 6371000, d = meters / R, br = toRad(bearing), la = toRad(p.lat), lo = toRad(p.lon);
+  var la2 = Math.asin(Math.sin(la)*Math.cos(d) + Math.cos(la)*Math.sin(d)*Math.cos(br));
+  var lo2 = lo + Math.atan2(Math.sin(br)*Math.sin(d)*Math.cos(la), Math.cos(d) - Math.sin(la)*Math.sin(la2));
+  return { lat: toDeg(la2), lon: toDeg(lo2) };
+}
+var CARD = ["north","north-east","east","south-east","south","south-west","west","north-west"];
+function cardinal(b){ return CARD[Math.round(norm360(b) / 45) % 8]; }
+function esc(s){ var d = document.createElement("div"); d.textContent = s == null ? "" : String(s); return d.innerHTML; }
+function initials(name){
+  var m = name.match(/\d+/); if (m) return m[0].slice(0,3);
+  var w = name.trim().split(/\s+/); return ((w[0]||"?")[0] + ((w[1]||"")[0]||"")).toUpperCase();
+}
+var toastT;
+function toast(msg){ var t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(function(){ t.hidden = true; }, 2800); }
+function minutesNow(){ var d = new Date(); return d.getHours()*60 + d.getMinutes(); }
+function toMin(t){ if (!t) return null; var p = t.split(":"); return (+p[0])*60 + (+p[1]); }
+function fmtTime(t){
+  var m = toMin(t); if (m == null) return "";
+  var h = Math.floor(m/60), mm = m % 60, ap = h >= 12 ? "pm" : "am"; h = h % 12 || 12;
+  return h + ":" + (mm < 10 ? "0" : "") + mm + " " + ap;
+}
+var secure = window.isSecureContext !== false;
+
+/* ---------- views ---------- */
+var views = ["home","compass","edit","menu"];
+function show(v){
+  views.forEach(function(n){ $(n).hidden = n !== v; });
+  if (v !== "compass") stopNav();
+  window.scrollTo(0,0);
+}
+
+/* ---------- home ---------- */
+function nextClassId(){
+  var now = minutesNow(), best = null, bestM = 1e9;
+  classes.forEach(function(c){ var m = toMin(c.time); if (m != null && m >= now - 10 && m < bestM){ bestM = m; best = c.id; } });
+  return best;
+}
+function sortedClasses(){
+  return classes.slice().sort(function(a,b){
+    var ma = toMin(a.time), mb = toMin(b.time);
+    if (ma != null && mb != null) return ma - mb;
+    if (ma != null) return -1; if (mb != null) return 1;
+    return a.name.localeCompare(b.name, undefined, {numeric:true});
+  });
+}
+function classRow(c, isNext, action){
+  var meta = [];
+  if (c.time) meta.push(fmtTime(c.time));
+  if (c.floor) meta.push("Floor " + c.floor);
+  return '<li><button class="class' + (isNext ? ' next' : '') + '" data-id="' + esc(c.id) + '" data-act="' + action + '">' +
+    '<span class="badge" style="background:' + esc(c.color || COLORS[0]) + '">' + esc(initials(c.name)) + '</span>' +
+    '<span class="text">' + (isNext ? '<span class="pill">Next up</span><br>' : '') +
+    '<span class="name">' + esc(c.name) + '</span>' + (meta.length ? '<br><span class="meta">' + esc(meta.join(" · ")) + '</span>' : '') + '</span>' +
+    '<span class="go">' + (action === "go" ? "Go" : "Edit") + '</span></button></li>';
+}
+function renderHome(){
+  var next = nextClassId();
+  $("classList").innerHTML = sortedClasses().map(function(c){ return classRow(c, c.id === next, "go"); }).join("");
+  $("emptyState").hidden = classes.length > 0;
+  $("homeLead").hidden = classes.length === 0;
+  $("secureBanner").hidden = secure;
+}
+$("classList").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-id]"); if (!b) return;
+  var c = classes.find(function(x){ return x.id === b.dataset.id; }); if (c) openCompass(c, false);
+});
+$("addBtn").addEventListener("click", function(){ openEdit(null); });
+$("menuBtn").addEventListener("click", openMenu);
+$("demoBtn").addEventListener("click", startDemo);
+
+/* ---------- import from shared link ---------- */
+var pendingImport = null;
+function b64urlEncode(str){ return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }
+function b64urlDecode(s){ s = s.replace(/-/g,"+").replace(/_/g,"/"); while (s.length % 4) s += "="; return decodeURIComponent(escape(atob(s))); }
+function packClasses(){
+  return b64urlEncode(JSON.stringify(classes.map(function(c){
+    return [c.name, +c.lat.toFixed(6), +c.lon.toFixed(6), c.notes || "", c.time || "", c.floor || "", c.color || ""];
+  })));
+}
+function checkImport(){
+  var m = location.hash.match(/^#rooms=([A-Za-z0-9_-]+)$/); if (!m) return;
+  try{
+    var arr = JSON.parse(b64urlDecode(m[1]));
+    pendingImport = arr.map(function(a){
+      return { id: uid(), name: String(a[0]).slice(0,40), lat: +a[1], lon: +a[2], notes: String(a[3]||"").slice(0,300),
+               time: /^\d\d:\d\d$/.test(a[4]) ? a[4] : "", floor: String(a[5]||"").slice(0,12),
+               color: COLORS.indexOf(a[6]) >= 0 ? a[6] : COLORS[0] };
+    }).filter(validClass);
+  }catch(e){ pendingImport = null; }
+  if (pendingImport && pendingImport.length){
+    var names = pendingImport.map(function(c){ return c.name; });
+    $("importTitle").textContent = "Add " + pendingImport.length + " shared " + (pendingImport.length === 1 ? "class" : "classes") + "?";
+    $("importText").textContent = names.slice(0,6).join(", ") + (names.length > 6 ? " and more" : "");
+    $("importBanner").hidden = false;
+  } else {
+    toast("That share link looks broken. Ask for a new one.");
+  }
+}
+function clearHash(){ try{ history.replaceState(null, "", location.pathname + location.search); }catch(e){ location.hash = ""; } }
+$("importYes").addEventListener("click", function(){
+  var added = 0;
+  pendingImport.forEach(function(n){
+    var same = classes.find(function(c){ return c.name.toLowerCase() === n.name.toLowerCase(); });
+    if (same){ Object.assign(same, n, {id: same.id}); } else { classes.push(n); added++; }
+  });
+  save(); pendingImport = null; $("importBanner").hidden = true; clearHash(); renderHome();
+  toast(added ? "Added " + added + (added === 1 ? " class" : " classes") : "Classes updated");
+});
+$("importNo").addEventListener("click", function(){ pendingImport = null; $("importBanner").hidden = true; clearHash(); });
+
+/* ---------- menu ---------- */
+function openMenu(){
+  var link = location.origin + location.pathname + "#rooms=" + packClasses();
+  $("shareLink").value = classes.length ? link : "Add a class first, then you can share.";
+  $("copyLink").disabled = !classes.length;
+  $("nativeShare").hidden = !(navigator.share && classes.length);
+  $("editList").innerHTML = classes.length ? sortedClasses().map(function(c){ return classRow(c, false, "edit"); }).join("") : '<li class="muted">No classes yet.</li>';
+  $("wipeConfirm").hidden = true; $("wipeBtn").hidden = !classes.length;
+  show("menu");
+}
+$("menuBack").addEventListener("click", function(){ renderHome(); show("home"); });
+$("copyLink").addEventListener("click", function(){
+  var box = $("shareLink");
+  var done = function(){ toast("Link copied"); };
+  var fallback = function(){ box.focus(); box.select(); try{ document.execCommand("copy") ? done() : toast("Press and hold the link to copy it"); }catch(e){ toast("Press and hold the link to copy it"); } };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(box.value).then(done, fallback); else fallback();
+});
+$("nativeShare").addEventListener("click", function(){
+  navigator.share({ title: "Class Compass", text: "My classes for Class Compass", url: $("shareLink").value }).catch(function(){});
+});
+$("editList").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-id]"); if (!b) return;
+  var c = classes.find(function(x){ return x.id === b.dataset.id; }); if (c) openEdit(c);
+});
+$("wipeBtn").addEventListener("click", function(){ $("wipeConfirm").hidden = false; $("wipeBtn").hidden = true; });
+$("wipeNo").addEventListener("click", function(){ $("wipeConfirm").hidden = true; $("wipeBtn").hidden = false; });
+$("wipeYes").addEventListener("click", function(){ classes = []; save(); renderHome(); show("home"); toast("All classes removed"); });
+
+/* ---------- edit ---------- */
+var editing = null, spot = null, spotWatch = null, spotTimer = null;
+$("colorPick").innerHTML = COLORS.map(function(c, i){
+  return '<label><input type="radio" name="color" id="col' + i + '" value="' + c + '"><span class="swatch" style="background:' + c + '" title="Color ' + (i+1) + '"></span></label>';
+}).join("");
+function setSpotUI(state, text, pct){
+  $("spotDot").className = "dot " + (state || "");
+  $("spotState").textContent = text;
+  $("spotMeter").hidden = pct == null;
+  if (pct != null) $("spotBar").style.width = Math.round(pct) + "%";
+}
+function describeSpot(s){
+  return "Spot saved (about ±" + Math.max(1, Math.round(s.acc || 0)) + " m)";
+}
+function openEdit(c){
+  editing = c;
+  spot = c ? { lat: c.lat, lon: c.lon, acc: c.acc } : null;
+  $("editTitle").textContent = c ? "Edit class" : "Add a class";
+  $("fName").value = c ? c.name : "";
+  $("fNotes").value = c ? (c.notes || "") : "";
+  $("fTime").value = c ? (c.time || "") : "";
+  $("fFloor").value = c ? (c.floor || "") : "";
+  $("fCoords").value = c ? c.lat.toFixed(6) + ", " + c.lon.toFixed(6) : "";
+  var col = c && c.color ? c.color : COLORS[classes.length % COLORS.length];
+  var idx = Math.max(0, COLORS.indexOf(col)); $("col" + idx).checked = true;
+  $("formErr").hidden = true; $("delBtn").hidden = !c; document.querySelector("#edit details").open = false; $("delConfirm").hidden = true;
+  $("spotBtn").textContent = c ? "Save this spot again" : "Save this spot";
+  $("spotBtn").disabled = false;
+  if (spot) setSpotUI("good", describeSpot(spot)); else setSpotUI("", "No spot saved yet");
+  show("edit");
+  if (!c) setTimeout(function(){ $("fName").focus(); }, 50);
+}
+function stopSpot(){
+  if (spotWatch != null){ navigator.geolocation.clearWatch(spotWatch); spotWatch = null; }
+  clearTimeout(spotTimer); spotTimer = null;
+}
+$("editBack").addEventListener("click", function(){ stopSpot(); renderHome(); if (editing) openMenu(); else show("home"); });
+
+/* Average several GPS readings, weighting the more accurate ones. Stops early once accuracy is good. */
+$("spotBtn").addEventListener("click", function(){
+  if (!secure){ setSpotUI("bad", "This page needs an https link to use location"); return; }
+  if (!navigator.geolocation){ setSpotUI("bad", "This phone can't share location. Type the spot in instead."); return; }
+  stopSpot();
+  var samples = [], start = Date.now(), MAX_MS = 15000, MIN_MS = 4000;
+  $("spotBtn").disabled = true;
+  setSpotUI("warn", "Listening… hold still", 2);
+  function finish(){
+    stopSpot(); $("spotBtn").disabled = false;
+    if (!samples.length){ setSpotUI("bad", "Couldn't get a location. Step near a window and try again."); return; }
+    samples.sort(function(a,b){ return a.acc - b.acc; });
+    var keep = samples.slice(0, Math.max(3, Math.ceil(samples.length * 0.6)));
+    var w = 0, la = 0, lo = 0;
+    keep.forEach(function(s){ var k = 1 / Math.max(1, s.acc * s.acc); w += k; la += s.lat * k; lo += s.lon * k; });
+    spot = { lat: la / w, lon: lo / w, acc: keep[0].acc };
+    $("fCoords").value = spot.lat.toFixed(6) + ", " + spot.lon.toFixed(6);
+    setSpotUI(spot.acc <= 20 ? "good" : "warn", describeSpot(spot) + (spot.acc > 20 ? ". That's fuzzy. Try again closer to a window or door." : ""));
+    $("spotBtn").textContent = "Save this spot again";
+  }
+  spotWatch = navigator.geolocation.watchPosition(function(p){
+    samples.push({ lat: p.coords.latitude, lon: p.coords.longitude, acc: p.coords.accuracy || 50 });
+    var el = Date.now() - start, best = Math.min.apply(null, samples.map(function(s){ return s.acc; }));
+    setSpotUI("warn", "Listening… hold still (±" + Math.round(best) + " m)", Math.min(100, el / MAX_MS * 100));
+    if (el > MIN_MS && best <= 6 && samples.length >= 2) finish();
+  }, function(err){
+    stopSpot(); $("spotBtn").disabled = false;
+    setSpotUI("bad", err.code === 1 ? "Location is blocked. Turn it on in your phone settings for this browser, then try again." : "Couldn't get a location. Step near a window and try again.");
+  }, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
+  spotTimer = setTimeout(finish, MAX_MS);
+});
+
+function parseCoords(s){
+  var m = String(s).trim().match(/^(-?\d+(?:\.\d+)?)\s*[,\s]\s*(-?\d+(?:\.\d+)?)$/);
+  if (!m) return null; var c = { lat: +m[1], lon: +m[2] };
+  return Math.abs(c.lat) <= 90 && Math.abs(c.lon) <= 180 ? c : null;
+}
+$("form").addEventListener("submit", function(e){
+  e.preventDefault();
+  var name = $("fName").value.trim(), err = "";
+  var typed = $("fCoords").value.trim(), place = spot;
+  if (typed){
+    var pc = parseCoords(typed);
+    if (!pc) err = "The latitude, longitude doesn't look right. Use two numbers with a comma, like 40.7128, -74.0060.";
+    else if (!spot || Math.abs(pc.lat - spot.lat) > 1e-6 || Math.abs(pc.lon - spot.lon) > 1e-6) place = { lat: pc.lat, lon: pc.lon, acc: 0 };
+  }
+  if (!name) err = "Give the class a name, like \"Room 12 Math\".";
+  else if (!place && !err) err = "Save the spot first. Stand at the classroom door and tap \"Save this spot\".";
+  if (err){ $("formErr").textContent = err; $("formErr").hidden = false; return; }
+  stopSpot();
+  var colorEl = document.querySelector('input[name=color]:checked');
+  var data = { name: name.slice(0,40), lat: place.lat, lon: place.lon, acc: place.acc || 0,
+    notes: $("fNotes").value.trim(), time: $("fTime").value || "", floor: $("fFloor").value.trim(),
+    color: colorEl ? colorEl.value : COLORS[0] };
+  if (editing) Object.assign(editing, data); else classes.push(Object.assign({ id: uid() }, data));
+  if (save()){ toast(editing ? "Class updated" : "Saved " + data.name); }
+  renderHome(); show("home");
+});
+$("delBtn").addEventListener("click", function(){ $("delConfirm").hidden = false; $("delBtn").hidden = true; });
+$("delNo").addEventListener("click", function(){ $("delConfirm").hidden = true; $("delBtn").hidden = false; });
+$("delYes").addEventListener("click", function(){
+  classes = classes.filter(function(c){ return c !== editing; }); save(); stopSpot(); renderHome(); show("home"); toast("Class deleted");
+});
+
+/* ---------- compass ---------- */
+var target = null, demo = false, here = null, geoWatch = null;
+var heading = null, headingSrc = null, hx = 0, hy = 0, lastOrientAt = 0, iosAcc = null, tilt = 0;
+var shownArrow = 0, shownRose = 0, arrivedOnce = false, wakeLock = null, raf = null, started = false;
+var speak = false, lastSpoken = "", lastSpokenAt = 0;
+try{ speak = localStorage.getItem(KEY + ".speak") === "1"; }catch(e){}
+
+function openCompass(c, isDemo){
+  target = c; demo = isDemo; here = null; heading = null; headingSrc = null; arrivedOnce = false; started = false;
+  $("targetName").textContent = c.name;
+  $("notesBody").textContent = c.notes || "";
+  $("notesBox").hidden = !c.notes;
+  $("demoChip").hidden = !isDemo; $("demoControls").hidden = !isDemo;
+  $("startBox").hidden = isDemo;
+  $("dial").classList.remove("arrived"); $("star").setAttribute("hidden",""); $("arrow").removeAttribute("hidden");
+  $("tipBox").hidden = true;
+  $("distBig").textContent = "--"; $("distSteps").innerHTML = "&nbsp;";
+  setSay(isDemo ? "" : "Tap start to begin");
+  setChip("gps", "", "Location: waiting"); setChip("cmp", "", "Compass: waiting");
+  updateSoundBtn();
+  show("compass");
+  if (isDemo) beginDemo();
+  else if (permissionsLikelyGranted()) beginNav(false);
+}
+/* Android/desktop don't need a tap for motion; iOS does, so it always shows the Start button first. */
+function permissionsLikelyGranted(){
+  return !(window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === "function") && sessionReady;
+}
+var sessionReady = false;
+$("startBtn").addEventListener("click", function(){ beginNav(true); });
+$("backBtn").addEventListener("click", function(){ renderHome(); show("home"); });
+$("soundBtn").addEventListener("click", function(){
+  speak = !speak; try{ localStorage.setItem(KEY + ".speak", speak ? "1" : "0"); }catch(e){}
+  updateSoundBtn(); if (speak) say("Talking directions on"); else if (window.speechSynthesis) speechSynthesis.cancel();
+});
+function updateSoundBtn(){
+  $("soundBtn").setAttribute("aria-pressed", speak ? "true" : "false");
+  $("soundBtn").setAttribute("aria-label", speak ? "Turn spoken directions off" : "Turn spoken directions on");
+  $("soundWaves").setAttribute("opacity", speak ? "1" : ".35");
+}
+function setChip(which, state, text){ $(which + "Dot").className = "dot " + state; $(which + "Text").textContent = text; }
+function setSay(t, arrived){ var s = $("say"); s.textContent = t; s.classList.toggle("arrived", !!arrived); }
+function say(t){
+  if (!speak || !window.speechSynthesis) return;
+  try{ speechSynthesis.cancel(); var u = new SpeechSynthesisUtterance(t); u.rate = 0.95; speechSynthesis.speak(u); }catch(e){}
+}
+
+function beginNav(fromTap){
+  $("startBox").hidden = true; started = true; sessionReady = true;
+  if (!secure){ setSay("This page needs an https link"); setChip("gps","bad","Location: needs https"); return; }
+  requestWake();
+  // Compass permission (iOS 13+) must be requested inside the tap.
+  // Listen either way: some browsers expose requestPermission but still send events.
+  if (window.DeviceOrientationEvent){
+    if (fromTap && typeof DeviceOrientationEvent.requestPermission === "function"){
+      DeviceOrientationEvent.requestPermission().then(function(r){ if (r !== "granted") compassDenied = true; })
+        .catch(function(){ compassDenied = true; });
+    }
+    listenOrientation();
+  } else noCompass("Compass: not on this phone");
+  // Location
+  if (!navigator.geolocation){ setChip("gps","bad","Location: not on this phone"); setSay("This phone can't share location"); return; }
+  geoWatch = navigator.geolocation.watchPosition(onPos, onPosErr, { enableHighAccuracy: true, maximumAge: 1000, timeout: 30000 });
+  setSay("Finding you…");
+  loop();
+  // If no orientation events arrive, the phone has no usable compass.
+  setTimeout(function(){ if (started && !demo && headingSrc !== "compass") noCompass(compassDenied ? "Compass: not allowed" : "Compass: not found"); }, 2500);
+}
+function stopNav(){
+  started = false; gotAbs = false; compassDenied = false;
+  if (geoWatch != null && navigator.geolocation){ navigator.geolocation.clearWatch(geoWatch); geoWatch = null; }
+  window.removeEventListener("deviceorientationabsolute", onAbs, true);
+  window.removeEventListener("deviceorientation", onOrient, true);
+  if (raf) cancelAnimationFrame(raf); raf = null;
+  if (wakeLock){ try{ wakeLock.release(); }catch(e){} wakeLock = null; }
+  if (window.speechSynthesis) try{ speechSynthesis.cancel(); }catch(e){}
+}
+function requestWake(){
+  if (!("wakeLock" in navigator)) return;
+  navigator.wakeLock.request("screen").then(function(l){ wakeLock = l; }).catch(function(){});
+}
+document.addEventListener("visibilitychange", function(){ if (document.visibilityState === "visible" && started && !wakeLock) requestWake(); });
+
+function listenOrientation(){
+  // Prefer the absolute (true north) stream on Android/Chrome.
+  if ("ondeviceorientationabsolute" in window) window.addEventListener("deviceorientationabsolute", onAbs, true);
+  window.addEventListener("deviceorientation", onOrient, true);
+}
+var gotAbs = false, compassDenied = false;
+function screenAngle(){
+  var a = (screen.orientation && typeof screen.orientation.angle === "number") ? screen.orientation.angle : (window.orientation || 0);
+  return +a || 0;
+}
+function onAbs(e){
+  if (e.alpha == null) return; gotAbs = true;
+  feedHeading(norm360(360 - e.alpha + screenAngle()), "compass", e.beta);
+}
+function onOrient(e){
+  if (typeof e.webkitCompassHeading === "number" && !isNaN(e.webkitCompassHeading)){
+    iosAcc = e.webkitCompassAccuracy;
+    feedHeading(norm360(e.webkitCompassHeading + screenAngle()), "compass", e.beta);
+  } else if (!gotAbs && e.absolute === true && e.alpha != null){
+    feedHeading(norm360(360 - e.alpha + screenAngle()), "compass", e.beta);
+  }
+}
+/* Smooth the heading as a unit vector so 359° -> 1° doesn't swing around. */
+function feedHeading(h, src, beta){
+  var k = 0.25;
+  if (heading == null){ hx = Math.cos(toRad(h)); hy = Math.sin(toRad(h)); }
+  else { hx = hx*(1-k) + Math.cos(toRad(h))*k; hy = hy*(1-k) + Math.sin(toRad(h))*k; }
+  heading = norm360(toDeg(Math.atan2(hy, hx))); headingSrc = src; lastOrientAt = Date.now();
+  tilt = typeof beta === "number" ? Math.abs(beta) : 0;
+}
+function noCompass(msg){
+  if (headingSrc === "compass") return;
+  headingSrc = null; setChip("cmp", "warn", msg + ". Walk to aim the arrow.");
+}
+function onPos(p){
+  here = { lat: p.coords.latitude, lon: p.coords.longitude, acc: p.coords.accuracy || 99 };
+  // Without a compass, use the walking direction from GPS when moving.
+  if (headingSrc !== "compass" && p.coords.heading != null && !isNaN(p.coords.heading) && (p.coords.speed || 0) > 0.6){
+    heading = p.coords.heading; headingSrc = "walking";
+  }
+}
+function onPosErr(err){
+  if (err.code === 1){ setChip("gps","bad","Location: blocked"); setSay("Location is turned off"); showTip("Turn on location for this browser in your phone settings, then come back and tap the class again."); }
+  else { setChip("gps","warn","Location: searching…"); }
+}
+function showTip(t){ $("tipText").textContent = t; $("tipBox").hidden = false; }
+
+function rotate(el, prev, next){
+  // Take the short way round so the arrow never spins a full circle.
+  var v = prev + norm180(next - prev);
+  el.style.transform = "rotate(" + v + "deg)";
+  return v;
+}
+function turnWords(rel){
+  var a = Math.abs(rel), side = rel < 0 ? "left" : "right";
+  if (a < 22) return "Go straight ahead";
+  if (a < 65) return "Turn a little " + side;
+  if (a < 140) return "Turn " + side;
+  return "Turn around";
+}
+function stepsText(m){
+  var steps = Math.round(m / 0.6 / 5) * 5; // kid steps are about 0.6 m
+  return steps <= 5 ? "just a few steps" : "about " + steps + " steps";
+}
+
+function loop(){
+  raf = requestAnimationFrame(loop);
+  tick();
+}
+var lastTick = 0;
+function tick(){
+  var now = Date.now(); if (now - lastTick < 100) return; lastTick = now;
+  if (!target) return;
+
+  // compass chip
+  if (headingSrc === "compass"){
+    var shaky = (iosAcc != null && (iosAcc < 0 || iosAcc > 25));
+    setChip("cmp", shaky ? "warn" : "good", shaky ? "Compass: wobbly, wave in a figure 8" : "Compass: on");
+  } else if (headingSrc === "walking"){
+    setChip("cmp", "warn", "Compass: using your walking");
+  }
+
+  if (!here){ return; }
+  var acc = here.acc;
+  setChip("gps", acc <= 12 ? "good" : acc <= 30 ? "warn" : "bad", "Location: ±" + Math.round(acc) + " m");
+
+  var d = distanceM(here, target), b = bearingDeg(here, target);
+  var arriveR = Math.max(6, Math.min(acc, 15));
+
+  if (d <= arriveR){
+    if (!arrivedOnce){ arrivedOnce = true; celebrate(); say("You made it to " + target.name + "!"); }
+    $("dial").classList.add("arrived"); $("arrow").setAttribute("hidden",""); $("star").removeAttribute("hidden");
+    setSay("You're here! Look for the room sign.", true);
+    $("distBig").textContent = Math.round(d) + " m"; $("distSteps").textContent = "right around here";
+    shownRose = rotate($("rose"), shownRose, heading == null ? 0 : -heading);
+    return;
+  }
+  if (arrivedOnce && d > arriveR + 8) arrivedOnce = false;
+  $("dial").classList.remove("arrived"); $("star").setAttribute("hidden",""); $("arrow").removeAttribute("hidden");
+
+  $("distBig").textContent = d >= 1000 ? (d/1000).toFixed(1) + " km" : Math.round(d) + " m";
+  $("distSteps").textContent = d > 400 ? "that's far, check you picked the right school spot" : stepsText(d);
+
+  var words;
+  if (heading != null){
+    var rel = norm180(b - heading);
+    shownArrow = rotate($("arrow"), shownArrow, rel);
+    shownRose = rotate($("rose"), shownRose, -heading);
+    $("dial").classList.remove("nocompass");
+    words = turnWords(rel);
+  } else {
+    // No heading at all: point relative to north and say the direction in words.
+    shownArrow = rotate($("arrow"), shownArrow, b);
+    shownRose = rotate($("rose"), shownRose, 0);
+    $("dial").classList.add("nocompass");
+    words = "Head " + cardinal(b) + ". Start walking and the arrow will follow you.";
+  }
+  if (acc > d * 1.5 && d < 40) words = "You're close! Look around for the sign.";
+  setSay(words);
+
+  var tip = null;
+  if (headingSrc === "compass" && tilt > 55) tip = "Hold the phone flat, like a plate, so the arrow stays steady.";
+  else if (acc > 30) tip = "GPS is fuzzy right now (±" + Math.round(acc) + " m). Move toward a window or doorway, or use the notes below.";
+  if (tip) showTip(tip); else $("tipBox").hidden = true;
+
+  if (speak && now - lastSpokenAt > 6000 && (words !== lastSpoken || now - lastSpokenAt > 15000)){
+    lastSpoken = words; lastSpokenAt = now; say(words + ". " + stepsText(d) + ".");
+  }
+}
+
+/* ---------- celebration ---------- */
+function celebrate(){
+  if (navigator.vibrate) try{ navigator.vibrate([120,60,120,60,240]); }catch(e){}
+  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  var cv = $("confetti"), ctx = cv.getContext("2d"); cv.hidden = false;
+  cv.width = innerWidth; cv.height = innerHeight;
+  var bits = []; for (var i = 0; i < 90; i++) bits.push({ x: Math.random()*cv.width, y: -20 - Math.random()*cv.height*0.5, vx: (Math.random()-.5)*3, vy: 2+Math.random()*4, r: Math.random()*6.28, c: COLORS[i % COLORS.length] });
+  var t0 = Date.now();
+  (function frame(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    bits.forEach(function(b){ b.x += b.vx; b.y += b.vy; b.r += .1; ctx.save(); ctx.translate(b.x,b.y); ctx.rotate(b.r); ctx.fillStyle = b.c; ctx.fillRect(-5,-3,10,6); ctx.restore(); });
+    if (Date.now() - t0 < 2600) requestAnimationFrame(frame); else { cv.hidden = true; }
+  })();
+}
+
+/* ---------- practice walk (works on any device) ---------- */
+var demoHeading = 0;
+function startDemo(){
+  var origin = { lat: 40.000000, lon: -75.000000 };
+  var room = offsetPoint(origin, 30, 60);
+  openCompass({ id: "demo", name: "Practice: Room 12", lat: room.lat, lon: room.lon, notes: "Down the main hall, past the library. Room 12 is the blue door on the right." }, true);
+  here = { lat: origin.lat, lon: origin.lon, acc: 5 };
+}
+function beginDemo(){
+  started = true; demoHeading = 0; $("demoTurn").value = 0;
+  heading = 0; headingSrc = "compass"; hx = 1; hy = 0;
+  loop();
+}
+$("demoTurn").addEventListener("input", function(){ demoHeading = +this.value; heading = demoHeading; hx = Math.cos(toRad(heading)); hy = Math.sin(toRad(heading)); });
+$("demoStep").addEventListener("click", function(){
+  if (!here) return; var p = offsetPoint(here, 3, demoHeading); here = { lat: p.lat, lon: p.lon, acc: 5 };
+});
+
+/* ---------- boot ---------- */
+renderHome();
+checkImport();
+window.addEventListener("hashchange", checkImport);
+// Work offline once installed (only on a real https host, not a saved file).
+if ("serviceWorker" in navigator && location.protocol === "https:"){
+  navigator.serviceWorker.register("sw.js").catch(function(){});
+}
+// Refresh "Next up" each minute.
+setInterval(function(){ if (!$("home").hidden) renderHome(); }, 60000);
+})();
+</script>
+</body>
+</html>
