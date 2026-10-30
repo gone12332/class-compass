@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<meta name="robots" content="noindex,nofollow">
+<title>Class Compass Admin</title>
+<link rel="icon" href="../icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: one column on phones, two-column dashboard on wide screens. Same amber terminal as the app. */
+:root{
+  --crt:#050505; --crt-2:#0e0b06; --amber:#ffb000; --amber-dim:#7a5600; --amber-faint:rgba(255,176,0,.10);
+  --ink:#ffd27a; --ink-dim:#b08a3e; --green:#39ff7a; --red:#ff4d3d; --warn:#ffcf4d;
+  --display:"VT323","Courier New",monospace;
+  --body:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;background:var(--crt);background-image:radial-gradient(120% 90% at 50% 30%,#120c02 0%,var(--crt) 70%);color:var(--ink);font:15px/1.5 var(--body);
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:30;background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0 2px,rgba(0,0,0,.26) 2px 3px);box-shadow:inset 0 0 120px rgba(0,0,0,.85)}
+[hidden]{display:none!important}
+.wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 40px;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--display);font-weight:400;color:var(--amber);text-shadow:0 0 8px rgba(255,176,0,.5);margin:0;text-transform:uppercase;line-height:1}
+h1{font-size:2.4rem}h2{font-size:1.8rem}h3{font-size:1.4rem}
+p{margin:0}
+.muted{color:var(--ink-dim)}.small{font-size:.82rem}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px dashed var(--amber);outline-offset:3px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:6px 16px;border:2px solid var(--amber);background:transparent;color:var(--amber);
+  font-family:var(--display);font-size:1.35rem;text-transform:uppercase;cursor:pointer;box-shadow:3px 3px 0 var(--amber-dim);text-shadow:0 0 6px rgba(255,176,0,.5)}
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--amber-dim)}
+.btn.primary{background:var(--amber);color:#050505;text-shadow:none}
+.btn.danger{border-color:var(--red);color:var(--red);box-shadow:3px 3px 0 #5a1610}
+.btn.good{border-color:var(--green);color:var(--green);box-shadow:3px 3px 0 #0f5a2a}
+.btn.sm{min-height:34px;font-size:1.1rem;padding:2px 10px;box-shadow:2px 2px 0 var(--amber-dim)}
+input[type=text],input[type=password]{width:100%;min-height:46px;padding:8px 12px;background:#000;border:1px solid var(--amber-dim);color:var(--amber);caret-color:var(--amber);font-size:1rem}
+input:focus{outline:none;border-color:var(--amber);box-shadow:0 0 0 1px var(--amber),0 0 14px rgba(255,176,0,.25)}
+label{display:flex;flex-direction:column;gap:6px;text-transform:uppercase;font-size:.8rem;letter-spacing:.06em;color:var(--amber)}
+.panel{border:1px solid var(--amber-dim);background:var(--crt-2);padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.panel>header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.panel h2::before{content:"// ";color:var(--amber-dim)}
+.cursor::after{content:"_";animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* login */
+.login{max-width:420px;width:100%;margin:8vh auto 0;display:flex;flex-direction:column;gap:16px}
+.login form{display:flex;flex-direction:column;gap:14px}
+.err{color:var(--red);min-height:1.5em}
+.setup ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:8px}
+code{font-family:var(--body);background:#000;border:1px solid var(--amber-dim);padding:0 4px;color:var(--amber);overflow-wrap:anywhere}
+
+/* top bar */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--amber-dim);padding-bottom:12px}
+.top .meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;color:var(--ink-dim);font-size:.85rem}
+
+/* tiles */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{border:1px solid var(--amber-dim);background:#000;padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.tile .k{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim)}
+.tile .v{font-family:var(--display);font-size:3.2rem;line-height:.95;color:var(--amber);text-shadow:0 0 10px rgba(255,176,0,.5);font-variant-numeric:tabular-nums}
+.tile .s{font-size:.78rem;color:var(--ink-dim)}
+.tile.live{border-color:var(--green)}
+.tile.live .v{color:var(--green);text-shadow:0 0 10px rgba(57,255,122,.5)}
+.tile.live .k::before{content:"";display:inline-block;width:8px;height:8px;background:var(--green);margin-right:6px;box-shadow:0 0 8px var(--green);animation:blink 1.2s steps(1) infinite}
+.tile.bad .v{color:var(--red);text-shadow:0 0 10px rgba(255,77,61,.4)}
+
+.grid2{display:grid;grid-template-columns:1fr;gap:18px}
+@media (min-width:900px){.grid2{grid-template-columns:1.4fr 1fr}}
+
+/* chart */
+.seg{display:flex;border:1px solid var(--amber-dim)}
+.seg button{background:transparent;border:0;border-right:1px solid var(--amber-dim);color:var(--ink-dim);padding:4px 10px;font-family:var(--display);font-size:1.15rem;text-transform:uppercase;cursor:pointer;min-height:34px}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--amber);color:#050505}
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:auto}
+.tip{position:absolute;pointer-events:none;background:#000;border:1px solid var(--amber);padding:4px 8px;font-size:.8rem;white-space:nowrap;transform:translate(-50%,-100%);color:var(--ink)}
+
+/* tables */
+.tablewrap{overflow-x:auto;border:1px solid var(--amber-dim)}
+table{width:100%;border-collapse:collapse;font-size:.85rem;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid rgba(255,176,0,.15);white-space:nowrap}
+th{font-weight:500;color:var(--ink-dim);text-transform:uppercase;font-size:.72rem;letter-spacing:.06em;background:#000;position:sticky;top:0}
+td.num,th.num{text-align:right}
+tr.banned td{color:var(--red)}
+.id{font-family:var(--body);color:var(--amber)}
+.status{display:inline-flex;align-items:center;gap:6px}
+.status::before{content:"";width:8px;height:8px;background:var(--ink-dim)}
+.status.on::before{background:var(--green);box-shadow:0 0 6px var(--green)}
+.status.ban::before{background:var(--red)}
+.empty{padding:16px;color:var(--ink-dim)}
+.banrow{display:flex;gap:8px;align-items:center}
+.banrow input{min-height:34px;width:180px;font-size:.85rem}
+
+/* poster maker */
+.maker{display:grid;grid-template-columns:1fr;gap:14px}
+@media (min-width:640px){.maker{grid-template-columns:1fr 1fr}}
+.poster{position:relative;z-index:31;background:#fff;color:#000;padding:18px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;font-family:var(--body)}
+.poster .p-title{font-family:var(--display);font-size:2.6rem;line-height:.9;letter-spacing:.02em}
+.poster .p-sub{font-size:.85rem;max-width:30ch}
+.poster .p-qr svg{width:min(60vw,240px);height:auto;display:block}
+.poster .p-spot{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:#444}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--amber-dim);background:transparent;color:var(--amber);padding:2px 10px;font-size:.8rem;cursor:pointer;min-height:32px}
+
+/* console */
+.term{background:#000;border:1px solid var(--amber-dim);height:260px;overflow-y:auto;padding:10px 12px;font-size:.85rem;white-space:pre-wrap;overflow-wrap:anywhere}
+.term .in{color:var(--amber)}
+.term .ok{color:var(--green)}
+.term .no{color:var(--red)}
+.prompt{display:flex;align-items:center;gap:8px;border:1px solid var(--amber-dim);border-top:0;background:#000;padding:0 10px}
+.prompt span{color:var(--amber);font-family:var(--display);font-size:1.4rem}
+.prompt input{border:0;box-shadow:none;background:transparent;min-height:44px;padding:0}
+.prompt input:focus{box-shadow:none}
+
+@media print{
+  body{background:#fff}
+  body::after{display:none}
+  body *{visibility:hidden}
+  #posterPreview,#posterPreview *{visibility:visible}
+  #posterPreview{position:fixed;inset:0;padding:40px;justify-content:center}
+  #posterPreview .p-title{font-size:5rem}
+  #posterPreview .p-sub{font-size:1.4rem;max-width:40ch}
+  #posterPreview .p-qr svg{width:12cm}
+  #posterPreview .p-spot{font-size:1rem}
+}
+@media (prefers-reduced-motion:reduce){.cursor::after,.tile.live .k::before{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- LOGIN -->
+  <section id="loginView" class="login" aria-labelledby="loginTitle">
+    <h1 id="loginTitle" class="cursor">Class Compass // admin</h1>
+
+    <div class="panel setup" id="setupPanel" hidden>
+      <h2>Stats aren't set up yet</h2>
+      <ol>
+        <li>Make a free account at <b>supabase.com</b> and create a new project.</li>
+        <li>Open <b>SQL Editor</b>, paste everything from <code>supabase/setup.sql</code> in the repo, and tap <b>Run</b>.</li>
+        <li>Open <b>Authentication &gt; Users &gt; Add user</b>. Email: <code>root@example.com</code>, pick a password, tick <b>Auto confirm</b>.</li>
+        <li>Open <b>Project Settings &gt; API</b> and copy the <b>Project URL</b> and the <b>anon public</b> key into <code>config.js</code>.</li>
+      </ol>
+    </div>
+
+    <form id="loginForm" class="panel" novalidate>
+      <label for="user">User
+        <input type="text" id="user" autocomplete="username" autocapitalize="none" spellcheck="false" value="root">
+      </label>
+      <label for="pass">Password
+        <input type="password" id="pass" autocomplete="current-password">
+      </label>
+      <p class="err" id="loginErr" role="alert"></p>
+      <button class="btn primary" type="submit" id="loginBtn">Log in</button>
+    </form>
+    <p class="muted small">This page only shows anonymous numbers: random phone IDs, scans, trips and arrivals. No names or locations are collected.</p>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section id="dashView" hidden style="display:flex;flex-direction:column;gap:18px">
+    <div class="top">
+      <h1 class="cursor">Class Compass // admin</h1>
+      <div class="meta">
+        <span id="whoami">root</span>
+        <span id="updated">updating…</span>
+        <button class="btn sm" id="refreshBtn">Refresh</button>
+        <button class="btn sm danger" id="logoutBtn">Log out</button>
+      </div>
+    </div>
+
+    <div class="tiles" id="tiles">
+      <div class="tile live"><span class="k">Online now</span><span class="v" id="tOnline">0</span><span class="s">active in the last 2 min</span></div>
+      <div class="tile"><span class="k">Scans today</span><span class="v" id="tScansToday">0</span><span class="s" id="tScansTotal">0 total</span></div>
+      <div class="tile"><span class="k">Opens today</span><span class="v" id="tOpensToday">0</span><span class="s" id="tOpensTotal">0 total</span></div>
+      <div class="tile"><span class="k">Phones today</span><span class="v" id="tPhonesToday">0</span><span class="s" id="tPhonesTotal">0 total</span></div>
+      <div class="tile"><span class="k">Trips today</span><span class="v" id="tTripsToday">0</span><span class="s" id="tTripsTotal">0 total</span></div>
+      <div class="tile"><span class="k">Arrivals today</span><span class="v" id="tArrToday">0</span><span class="s" id="tArrTotal">0 total</span></div>
+      <div class="tile bad"><span class="k">Banned</span><span class="v" id="tBanned">0</span><span class="s">phones</span></div>
+    </div>
+
+    <div class="grid2">
+      <div class="panel">
+        <header>
+          <h2>Last 14 days</h2>
+          <div class="seg" role="group" aria-label="Chart measure">
+            <button data-m="opens" aria-pressed="true">Opens</button>
+            <button data-m="scans" aria-pressed="false">Scans</button>
+            <button data-m="arrivals" aria-pressed="false">Arrivals</button>
+          </div>
+        </header>
+        <div class="chart" id="chart"></div>
+      </div>
+
+      <div class="panel">
+        <header><h2>Posters</h2><span class="muted small">scans per QR spot</span></header>
+        <div class="tablewrap"><table>
+          <thead><tr><th>Spot</th><th class="num">Scans</th><th class="num">Phones</th><th>Last scan</th></tr></thead>
+          <tbody id="posterRows"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <header><h2>QR poster maker</h2><span class="muted small">one poster per spot, so you can see which spots get scanned</span></header>
+      <div class="maker">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <label for="spotName">Spot name
+            <input type="text" id="spotName" maxlength="40" placeholder="library, front door, gym hallway" autocomplete="off">
+          </label>
+          <p class="muted small">Link: <code id="spotUrl"></code></p>
+          <div class="row">
+            <button class="btn primary" id="printBtn">Print poster</button>
+            <button class="btn" id="pngBtn">Save image</button>
+          </div>
+          <p class="muted small">Existing spots:</p>
+          <div class="chips" id="spotChips"><span class="muted small">None yet</span></div>
+        </div>
+        <div class="poster" id="posterPreview">
+          <span class="p-title">LOST? SCAN ME</span>
+          <span class="p-sub">Class Compass points an arrow to your classroom. Open your phone camera and point it here.</span>
+          <span class="p-qr" id="posterQr"></span>
+          <span class="p-spot" id="posterSpot"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <header>
+        <h2>Phones</h2>
+        <div class="seg" role="group" aria-label="Phone filter">
+          <button data-f="all" aria-pressed="true">All</button>
+          <button data-f="online" aria-pressed="false">Online</button>
+          <button data-f="banned" aria-pressed="false">Banned</button>
+        </div>
+      </header>
+      <div class="tablewrap" style="max-height:440px;overflow-y:auto"><table>
+        <thead><tr><th>Phone ID</th><th>Status</th><th>Type</th><th class="num">Visits</th><th class="num">Arrivals</th><th>Poster</th><th>Last seen</th><th>First seen</th><th></th></tr></thead>
+        <tbody id="deviceRows"></tbody>
+      </table></div>
+    </div>
+
+    <div class="panel">
+      <header><h2>Dev console</h2><span class="muted small">type <b>help</b></span></header>
+      <div>
+        <div class="term" id="term" aria-live="polite"></div>
+        <form class="prompt" id="cmdForm"><span aria-hidden="true">&gt;</span>
+          <input type="text" id="cmd" autocomplete="off" autocapitalize="none" spellcheck="false" aria-label="Command">
+        </form>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script>
+(function(){
+"use strict";
+var $ = function(id){ return document.getElementById(id); };
+var CFG = window.CC_CONFIG || {}, BASE = (CFG.supabaseUrl || "").replace(/\/$/, ""), KEY = CFG.supabaseAnonKey || "";
+var configured = !!(BASE && KEY);
+var APP_URL = location.origin + location.pathname.replace(/admin\/?(index\.html)?$/, "");
+var TZ = (Intl.DateTimeFormat().resolvedOptions().timeZone) || "UTC";
+var SKEY = "classCompass.admin.session";
+var session = null, stats = null, devices = [], filter = "all", measure = "opens", timer = null;
+
+function esc(s){ var d = document.createElement("div"); d.textContent = s == null ? "" : String(s); return d.innerHTML; }
+function ago(iso){
+  if (!iso) return "";
+  var s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 60) return Math.round(s) + "s ago"; if (s < 3600) return Math.round(s/60) + "m ago";
+  if (s < 86400) return Math.round(s/3600) + "h ago"; return Math.round(s/86400) + "d ago";
+}
+function slug(t){ return String(t || "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40); }
+
+/* ---------- auth ---------- */
+function saveSession(s){ session = s; try{ s ? sessionStorage.setItem(SKEY, JSON.stringify(s)) : sessionStorage.removeItem(SKEY); }catch(e){} }
+function loadSession(){ try{ return JSON.parse(sessionStorage.getItem(SKEY) || "null"); }catch(e){ return null; } }
+function authReq(body, grant){
+  return fetch(BASE + "/auth/v1/token?grant_type=" + grant, {
+    method: "POST", headers: { "Content-Type": "application/json", apikey: KEY }, body: JSON.stringify(body)
+  }).then(function(r){ return r.json().then(function(j){ if (!r.ok) throw j; return j; }); });
+}
+function fromAuth(j){ return { access: j.access_token, refresh: j.refresh_token, exp: Date.now() + (j.expires_in || 3600) * 1000, email: j.user && j.user.email }; }
+function login(user, pass){
+  var email = user.indexOf("@") >= 0 ? user : user + "@example.com";
+  return authReq({ email: email, password: pass }, "password").then(function(j){ saveSession(fromAuth(j)); });
+}
+function freshToken(){
+  if (!session) return Promise.reject({ code: "auth" });
+  if (Date.now() < session.exp - 60000) return Promise.resolve(session.access);
+  return authReq({ refresh_token: session.refresh }, "refresh_token").then(function(j){ saveSession(fromAuth(j)); return session.access; });
+}
+function rpc(name, args){
+  return freshToken().then(function(tok){
+    return fetch(BASE + "/rest/v1/rpc/" + name, {
+      method: "POST", headers: { "Content-Type": "application/json", apikey: KEY, Authorization: "Bearer " + tok }, body: JSON.stringify(args || {})
+    });
+  }).then(function(r){
+    return r.json().catch(function(){ return null; }).then(function(j){
+      if (r.status === 401 || r.status === 403 || (j && j.code === "42501")) throw { code: "auth", message: "This login isn't the admin." };
+      if (!r.ok) throw { code: "http", message: (j && (j.message || j.hint)) || ("Error " + r.status) };
+      return j;
+    });
+  });
+}
+
+/* ---------- views ---------- */
+function showLogin(msg){
+  clearInterval(timer); timer = null;
+  $("dashView").hidden = true; $("loginView").hidden = false;
+  $("setupPanel").hidden = configured; $("loginBtn").disabled = !configured;
+  $("loginErr").textContent = msg || (configured ? "" : "Add your Supabase details to config.js first.");
+}
+function showDash(){
+  $("loginView").hidden = true; $("dashView").hidden = false;
+  $("whoami").textContent = (session.email || "root").replace("@example.com", "");
+  refresh(); clearInterval(timer); timer = setInterval(refresh, 15000);
+  if (!$("term").textContent) say("Logged in. Type help for commands.", "ok");
+}
+$("loginForm").addEventListener("submit", function(e){
+  e.preventDefault(); if (!configured) return;
+  $("loginErr").textContent = ""; $("loginBtn").disabled = true;
+  login($("user").value.trim(), $("pass").value).then(function(){
+    return rpc("cc_admin_stats", { p_tz: TZ });
+  }).then(function(){ $("pass").value = ""; showDash(); }).catch(function(err){
+    saveSession(null);
+    showLogin(err && err.code === "auth" ? "This account isn't the admin. Use the root user." : "Wrong username or password.");
+  }).then(function(){ $("loginBtn").disabled = !configured; });
+});
+$("logoutBtn").addEventListener("click", logout);
+$("refreshBtn").addEventListener("click", function(){ refresh(); });
+function logout(){
+  if (session) fetch(BASE + "/auth/v1/logout", { method: "POST", headers: { apikey: KEY, Authorization: "Bearer " + session.access } }).catch(function(){});
+  saveSession(null); showLogin("Logged out.");
+}
+
+/* ---------- data ---------- */
+function refresh(){
+  return Promise.all([rpc("cc_admin_stats", { p_tz: TZ }), rpc("cc_admin_devices", { p_filter: filter, p_limit: 300 })])
+    .then(function(r){ stats = r[0]; devices = r[1] || []; render(); $("updated").textContent = "updated " + new Date().toLocaleTimeString(); })
+    .catch(function(err){
+      if (err && err.code === "auth"){ saveSession(null); showLogin("Your login ran out. Log in again."); }
+      else $("updated").textContent = "offline, retrying…";
+    });
+}
+function set(id, v){ $(id).textContent = v; }
+function render(){
+  var s = stats || {};
+  set("tOnline", s.online_now || 0);
+  set("tScansToday", s.scans_today || 0); set("tScansTotal", (s.scans_total || 0) + " total");
+  set("tOpensToday", s.opens_today || 0); set("tOpensTotal", (s.opens_total || 0) + " total");
+  set("tPhonesToday", s.phones_today || 0); set("tPhonesTotal", (s.phones_total || 0) + " total · " + (s.phones_new_today || 0) + " new today");
+  set("tTripsToday", s.trips_today || 0); set("tTripsTotal", (s.trips_total || 0) + " total");
+  set("tArrToday", s.arrivals_today || 0); set("tArrTotal", (s.arrivals_total || 0) + " total");
+  set("tBanned", s.banned_total || 0);
+  renderChart(); renderPosters(); renderDevices();
+}
+
+/* Bar chart: one measure at a time, one hue, value on hover. */
+function renderChart(){
+  var days = (stats && stats.days) || [], W = 560, H = 220, L = 34, R = 8, T = 12, B = 30;
+  var vals = days.map(function(d){ return +d[measure] || 0; }), max = Math.max(4, Math.max.apply(null, vals.concat([0])));
+  var step = Math.pow(10, Math.floor(Math.log10(max))), nice = Math.ceil(max / step) * step; if (nice / step < 3) { step /= 2; }
+  var y = function(v){ return T + (H - T - B) * (1 - v / nice); };
+  var bw = (W - L - R) / Math.max(1, days.length), g = "";
+  for (var t = 0; t <= nice; t += step){
+    g += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(t) + '" y2="' + y(t) + '" stroke="#ffb000" stroke-opacity="' + (t === 0 ? .6 : .12) + '"/>';
+    g += '<text x="' + (L - 6) + '" y="' + (y(t) + 4) + '" text-anchor="end" fill="#b08a3e" font-size="11" font-family="IBM Plex Mono,monospace">' + t + '</text>';
+  }
+  days.forEach(function(d, i){
+    var v = vals[i], x = L + i * bw + 2, w = Math.max(2, bw - 4), top = y(v), h = Math.max(0, y(0) - top);
+    if (h > 0) g += '<path d="M' + x + ' ' + y(0) + ' V' + (top + Math.min(4, h)) + ' Q' + x + ' ' + top + ' ' + (x + Math.min(4, w/2)) + ' ' + top + ' H' + (x + w - Math.min(4, w/2)) + ' Q' + (x + w) + ' ' + top + ' ' + (x + w) + ' ' + (top + Math.min(4, h)) + ' V' + y(0) + ' Z" fill="#ffb000" fill-opacity="' + (i === days.length - 1 ? 1 : .7) + '"/>';
+    if (i % 2 === (days.length - 1) % 2){
+      var dt = new Date(d.day + "T12:00:00");
+      g += '<text x="' + (x + w/2) + '" y="' + (H - 10) + '" text-anchor="middle" fill="#b08a3e" font-size="10" font-family="IBM Plex Mono,monospace">' + (dt.getMonth() + 1) + "/" + dt.getDate() + '</text>';
+    }
+    g += '<rect class="hit" data-i="' + i + '" x="' + (L + i * bw) + '" y="' + T + '" width="' + bw + '" height="' + (H - T - B) + '" fill="transparent"/>';
+  });
+  $("chart").innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(measure) + ' per day for the last 14 days">' + g + '</svg><div class="tip" id="tip" hidden></div>';
+  $("chart").querySelectorAll(".hit").forEach(function(r){
+    r.addEventListener("pointerenter", function(){
+      var i = +r.dataset.i, d = days[i], tip = $("tip"), box = $("chart").getBoundingClientRect(), rb = r.getBoundingClientRect();
+      tip.textContent = new Date(d.day + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }) + ": " + vals[i] + " " + measure;
+      tip.style.left = (rb.left - box.left + rb.width / 2) + "px"; tip.style.top = (y(vals[i]) / H * box.height - 6) + "px"; tip.hidden = false;
+    });
+    r.addEventListener("pointerleave", function(){ $("tip").hidden = true; });
+  });
+}
+document.querySelectorAll("[data-m]").forEach(function(b){
+  b.addEventListener("click", function(){
+    measure = b.dataset.m;
+    document.querySelectorAll("[data-m]").forEach(function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+    renderChart();
+  });
+});
+
+function renderPosters(){
+  var ps = (stats && stats.posters) || [];
+  $("posterRows").innerHTML = ps.length ? ps.map(function(p){
+    return '<tr><td class="id">' + esc(p.src) + '</td><td class="num">' + p.scans + '</td><td class="num">' + p.phones + '</td><td>' + esc(ago(p.last_scan)) + '</td></tr>';
+  }).join("") : '<tr><td colspan="4" class="empty">No poster scans yet. Make a poster below and put it up.</td></tr>';
+  $("spotChips").innerHTML = ps.length ? ps.map(function(p){ return '<button class="chip" data-spot="' + esc(p.src) + '">' + esc(p.src) + '</button>'; }).join("") : '<span class="muted small">None yet</span>';
+}
+$("spotChips").addEventListener("click", function(e){ var b = e.target.closest("[data-spot]"); if (b){ $("spotName").value = b.dataset.spot; drawPoster(); } });
+
+var banOpen = null;
+function renderDevices(){
+  $("deviceRows").innerHTML = devices.length ? devices.map(function(d){
+    var st = d.banned ? '<span class="status ban">banned</span>' : d.online ? '<span class="status on">online</span>' : '<span class="status">offline</span>';
+    var act = d.banned
+      ? '<button class="btn sm good" data-unban="' + esc(d.id) + '">Unban</button>'
+      : banOpen === d.id
+        ? '<span class="banrow"><input type="text" id="banNote" maxlength="120" placeholder="Reason (optional)" aria-label="Ban reason"><button class="btn sm danger" data-ban-yes="' + esc(d.id) + '">Ban</button><button class="btn sm" data-ban-no>Cancel</button></span>'
+        : '<button class="btn sm danger" data-ban="' + esc(d.id) + '">Ban</button>';
+    return '<tr class="' + (d.banned ? "banned" : "") + '"><td class="id" title="' + esc(d.id) + '">' + esc(d.id.slice(0, 8)) + '</td><td>' + st + (d.ban_note ? ' <span class="muted small">' + esc(d.ban_note) + '</span>' : '') +
+      '</td><td>' + esc(d.platform || "") + '</td><td class="num">' + d.visits + '</td><td class="num">' + d.arrivals + '</td><td>' + esc(d.last_src || "") +
+      '</td><td>' + esc(ago(d.last_seen)) + '</td><td>' + esc(ago(d.first_seen)) + '</td><td>' + act + '</td></tr>';
+  }).join("") : '<tr><td colspan="9" class="empty">' + (filter === "banned" ? "No banned phones." : filter === "online" ? "Nobody online right now." : "No phones yet. They show up after someone opens the app.") + '</td></tr>';
+  if (banOpen && $("banNote")) $("banNote").focus();
+}
+$("deviceRows").addEventListener("click", function(e){
+  var b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.ban){ banOpen = b.dataset.ban; renderDevices(); }
+  else if (b.hasAttribute("data-ban-no")){ banOpen = null; renderDevices(); }
+  else if (b.dataset.banYes){ var note = $("banNote") ? $("banNote").value : ""; banOpen = null; setBan(b.dataset.banYes, true, note); }
+  else if (b.dataset.unban){ setBan(b.dataset.unban, false); }
+});
+function setBan(id, on, note){
+  return rpc("cc_admin_ban", { p_device: id, p_banned: on, p_note: note || null }).then(function(r){
+    say((on ? "Banned " : "Unbanned ") + id.slice(0, 8) + (note ? " (" + note + ")" : ""), r && r.ok ? "ok" : "no"); return refresh();
+  }).catch(function(e){ say("Couldn't change that: " + (e.message || "error"), "no"); });
+}
+document.querySelectorAll("[data-f]").forEach(function(b){
+  b.addEventListener("click", function(){
+    filter = b.dataset.f;
+    document.querySelectorAll("[data-f]").forEach(function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+    refresh();
+  });
+});
+
+/* ---------- poster maker ---------- */
+function spotLink(){ var sp = slug($("spotName").value) || "poster"; return APP_URL + "?src=" + sp; }
+function qr(text){ if (typeof qrcode !== "function") return null; var q = qrcode(0, "M"); q.addData(text); q.make(); return q; }
+function drawPoster(){
+  var url = spotLink(), q = qr(url);
+  $("spotUrl").textContent = url;
+  $("posterSpot").textContent = "spot: " + (slug($("spotName").value) || "poster");
+  $("posterQr").innerHTML = q ? q.createSvgTag({ cellSize: 6, margin: 2, scalable: true }) : '<span style="color:#a00">QR library didn\'t load. Check the internet.</span>';
+}
+$("spotName").addEventListener("input", drawPoster);
+$("printBtn").addEventListener("click", function(){ drawPoster(); window.print(); });
+$("pngBtn").addEventListener("click", function(){
+  var url = spotLink(), q = qr(url); if (!q) return;
+  var n = q.getModuleCount(), cell = 16, pad = 64, qs = n * cell, W = qs + pad * 2, H = qs + pad * 2 + 260;
+  var c = document.createElement("canvas"); c.width = W; c.height = H; var x = c.getContext("2d");
+  x.fillStyle = "#fff"; x.fillRect(0, 0, W, H); x.fillStyle = "#000"; x.textAlign = "center";
+  x.font = "bold 92px VT323, 'Courier New', monospace"; x.fillText("LOST? SCAN ME", W / 2, pad + 70);
+  x.font = "28px 'IBM Plex Mono', monospace"; x.fillText("Class Compass points to your classroom", W / 2, pad + 120);
+  for (var r = 0; r < n; r++) for (var cc = 0; cc < n; cc++) if (q.isDark(r, cc)) x.fillRect(pad + cc * cell, pad + 170 + r * cell, cell, cell);
+  x.font = "24px 'IBM Plex Mono', monospace"; x.fillStyle = "#444"; x.fillText("spot: " + (slug($("spotName").value) || "poster"), W / 2, H - pad + 10);
+  var a = document.createElement("a"); a.href = c.toDataURL("image/png"); a.download = "class-compass-" + (slug($("spotName").value) || "poster") + ".png";
+  document.body.appendChild(a); a.click(); a.remove();
+});
+
+/* ---------- dev console ---------- */
+function say(text, cls){
+  var t = $("term"), line = document.createElement("div"); if (cls) line.className = cls; line.textContent = text; t.appendChild(line); t.scrollTop = t.scrollHeight;
+}
+function findDevice(prefix){
+  prefix = (prefix || "").toLowerCase();
+  if (prefix.length < 4) return Promise.reject("Give at least 4 characters of the phone ID.");
+  return rpc("cc_admin_devices", { p_filter: "all", p_limit: 1000 }).then(function(all){
+    var m = (all || []).filter(function(d){ return d.id.indexOf(prefix) === 0; });
+    if (!m.length) throw "No phone starts with " + prefix + ".";
+    if (m.length > 1) throw prefix + " matches " + m.length + " phones. Type more of the ID.";
+    return m[0];
+  });
+}
+var HELP = [
+  "help                    show this list",
+  "stats                   today's numbers",
+  "online                  phones active in the last 2 minutes",
+  "phones [online|banned]  list phones (newest first)",
+  "ban <id> [reason]       ban a phone (first 4+ characters of its ID)",
+  "unban <id>              unban a phone",
+  "posters                 scans per QR spot",
+  "qr <spot name>          load a poster for that spot",
+  "refresh                 reload everything now",
+  "clear                   clear this screen",
+  "logout                  log out"
+].join("\n");
+var history_ = [], hIdx = 0;
+$("cmd").addEventListener("keydown", function(e){
+  if (e.key === "ArrowUp" && history_.length){ hIdx = Math.max(0, hIdx - 1); this.value = history_[hIdx]; e.preventDefault(); }
+  if (e.key === "ArrowDown" && history_.length){ hIdx = Math.min(history_.length, hIdx + 1); this.value = history_[hIdx] || ""; e.preventDefault(); }
+});
+$("cmdForm").addEventListener("submit", function(e){
+  e.preventDefault();
+  var line = $("cmd").value.trim(); $("cmd").value = ""; if (!line) return;
+  history_.push(line); hIdx = history_.length; say("> " + line, "in");
+  var parts = line.split(/\s+/), cmd = parts[0].toLowerCase(), arg = parts.slice(1);
+  var fail = function(m){ say(typeof m === "string" ? m : (m && m.message) || "Something went wrong.", "no"); };
+  switch (cmd){
+    case "help": case "?": say(HELP); break;
+    case "clear": $("term").textContent = ""; break;
+    case "logout": logout(); break;
+    case "refresh": refresh().then(function(){ say("Refreshed.", "ok"); }); break;
+    case "whoami": say(session && session.email || "?"); break;
+    case "stats":
+      rpc("cc_admin_stats", { p_tz: TZ }).then(function(s){
+        say("online now " + s.online_now + "\nscans     " + s.scans_today + " today / " + s.scans_total + " total\nopens     " + s.opens_today + " today / " + s.opens_total + " total\nphones    " + s.phones_today + " today / " + s.phones_total + " total (" + s.phones_new_today + " new)\ntrips     " + s.trips_today + " today / " + s.trips_total + " total\narrivals  " + s.arrivals_today + " today / " + s.arrivals_total + " total\nbanned    " + s.banned_total);
+      }).catch(fail); break;
+    case "online": case "phones":
+      var f = cmd === "online" ? "online" : (arg[0] === "online" || arg[0] === "banned" ? arg[0] : "all");
+      rpc("cc_admin_devices", { p_filter: f, p_limit: 50 }).then(function(ds){
+        if (!ds.length){ say("None."); return; }
+        say(ds.map(function(d){ return d.id.slice(0, 8) + "  " + (d.banned ? "BANNED " : d.online ? "online " : "       ") + (d.platform || "").padEnd(8) + " visits " + String(d.visits).padStart(3) + "  seen " + ago(d.last_seen) + (d.last_src ? "  poster " + d.last_src : ""); }).join("\n"));
+      }).catch(fail); break;
+    case "ban": case "unban":
+      if (!arg[0]){ fail("Usage: " + cmd + " <id>" + (cmd === "ban" ? " [reason]" : "")); break; }
+      findDevice(arg[0]).then(function(d){ return setBan(d.id, cmd === "ban", arg.slice(1).join(" ")); }).catch(fail); break;
+    case "posters":
+      rpc("cc_admin_stats", { p_tz: TZ }).then(function(s){
+        say(s.posters.length ? s.posters.map(function(p){ return p.src.padEnd(20) + String(p.scans).padStart(5) + " scans  " + String(p.phones).padStart(4) + " phones  last " + ago(p.last_scan); }).join("\n") : "No poster scans yet.");
+      }).catch(fail); break;
+    case "qr":
+      if (!arg.length){ fail("Usage: qr <spot name>"); break; }
+      $("spotName").value = arg.join(" "); drawPoster(); say("Poster ready: " + spotLink(), "ok");
+      $("posterPreview").scrollIntoView({ behavior: "smooth", block: "center" }); break;
+    default: fail("Unknown command: " + cmd + ". Type help.");
+  }
+});
+
+/* ---------- boot ---------- */
+drawPoster();
+session = loadSession();
+if (configured && session) showDash(); else showLogin();
+})();
+</script>
+</body>
+</html>

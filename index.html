@@ -384,6 +384,14 @@ legend{color:var(--amber);font-family:var(--body);text-transform:uppercase;font-
 .chip{border-radius:0;background:transparent;border:1px solid var(--amber-dim);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em}
 input[type=range]{accent-color:var(--amber)}
 @media (prefers-reduced-motion:reduce){.greet::after,.hero-go::after{animation:none}}
+
+/* ---------- v5: QR + ban screen ---------- */
+.qrbox{display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px;border:1px solid var(--amber-dim);background:#000}
+#shareQrImg{background:#fff;padding:12px;line-height:0;position:relative;z-index:31} /* above the scanlines so cameras can read it */
+#shareQrImg svg,#shareQrImg img{width:min(64vw,260px);height:auto;display:block}
+.banned-screen{position:fixed;inset:0;z-index:40;background:var(--crt);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;
+  padding:max(24px,env(safe-area-inset-top,0px)) max(24px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(24px,env(safe-area-inset-left,0px))}
+.banned-screen h2{color:var(--red);text-shadow:0 0 10px rgba(255,77,61,.6);font-size:2.6rem}
 </style>
 </head>
 <body>
@@ -642,6 +650,11 @@ input[type=range]{accent-color:var(--amber)}
       <div class="row">
         <button class="btn primary" id="copyLink">Copy link</button>
         <button class="btn" id="nativeShare" hidden>Share…</button>
+        <button class="btn" id="qrBtn">QR code</button>
+      </div>
+      <div class="qrbox" id="shareQr" hidden>
+        <div id="shareQrImg" role="img" aria-label="QR code of the share link"></div>
+        <p class="small">Point another phone's camera at this code to copy your classes over.</p>
       </div>
     </div>
 
@@ -670,9 +683,12 @@ input[type=range]{accent-color:var(--amber)}
         <li>Stay away from metal lockers and big speakers for a second. They confuse the compass.</li>
         <li>Save spots near windows or doors. GPS works better there.</li>
         <li>On iPhone, tap <b>Share</b> then <b>Add to Home Screen</b> to keep it like an app.</li>
+        <li>Lost the arrow? Look for a Class Compass QR poster and scan it with your camera.</li>
         <li>The home-screen app keeps its own list. If you saved classes in Safari first, copy the share link there and paste it under "Add classes from a link" in the home-screen app.</li>
       </ul>
     </div>
+
+    <p class="muted small">Class Compass counts app opens, trips and arrivals with a random number made up by this phone. It never sends your name, your location or your class names.</p>
 
     <button class="btn danger wide" id="wipeBtn">Remove all classes</button>
     <div class="banner bad" id="wipeConfirm" hidden>
@@ -682,9 +698,17 @@ input[type=range]{accent-color:var(--amber)}
   </section>
 </div>
 
+<div class="banned-screen" id="bannedScreen" hidden role="alertdialog" aria-labelledby="bannedTitle">
+  <h2 id="bannedTitle">Access paused</h2>
+  <p>This phone can't use Class Compass right now.</p>
+  <p class="muted" id="bannedNote"></p>
+  <p class="muted small">If you think this is a mistake, ask the person who runs the posters.</p>
+</div>
 <div class="toast" id="toast" role="status" hidden></div>
 <canvas class="confetti" id="confetti" hidden></canvas>
 
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
 (function(){
 "use strict";
@@ -1054,6 +1078,7 @@ function say(t){
 
 function beginNav(fromTap){
   $("startBox").hidden = true; started = true; sessionReady = true;
+  track("trip");
   if (!secure){ setSay("This page needs an https link"); setChip("gps","bad","Location: needs https"); return; }
   requestWake();
   // Compass permission (iOS 13+) must be requested inside the tap.
@@ -1204,6 +1229,7 @@ function tick(){
       arrivedOnce = true; celebrate(); chime([523, 659, 784, 1047]); say("You made it to " + target.name + "!");
       if (!demo){
         var before = levelFor(prefs.total)[1];
+        track("arrive");
         prefs.total = (prefs.total || 0) + 1; prefs.stars[target.id] = (prefs.stars[target.id] || 0) + 1; savePrefs();
         var after = levelFor(prefs.total)[1];
         $("distSteps").dataset.star = after !== before ? "New level: " + after + "!" : "+1 star! You have " + prefs.total + ".";
@@ -1345,6 +1371,62 @@ function buzz(p){ if (navigator.vibrate) try{ navigator.vibrate(p); }catch(e){} 
          '" stroke="#ffb000" stroke-opacity="' + (big ? .85 : .35) + '" stroke-width="' + (big ? 2 : 1.2) + '" stroke-linecap="butt"/>';
   }
   $("ticks").innerHTML = g;
+})();
+
+/* ---------- QR code for the share link ---------- */
+function qrSvg(text){
+  if (typeof qrcode !== "function") return null;
+  try{ var q = qrcode(0, "M"); q.addData(text); q.make(); return q.createSvgTag({ cellSize: 4, margin: 0, scalable: true }); }
+  catch(e){ return null; }
+}
+$("qrBtn").addEventListener("click", function(){
+  if (!classes.length){ toast("Add a class first"); return; }
+  var box = $("shareQr");
+  if (!box.hidden){ box.hidden = true; return; }
+  var svg = qrSvg($("shareLink").value);
+  if (!svg){ toast("QR codes need the internet the first time. Try again online."); return; }
+  $("shareQrImg").innerHTML = svg; box.hidden = false;
+});
+
+/* ---------- anonymous stats + bans ---------- */
+var CFG = window.CC_CONFIG || {}, statsOn = !!(CFG.supabaseUrl && CFG.supabaseAnonKey);
+function deviceId(){
+  var k = KEY + ".device", id = null;
+  try{ id = localStorage.getItem(k); }catch(e){}
+  if (!id || !/^[a-f0-9]{16,64}$/.test(id)){
+    var a = new Uint8Array(12); (window.crypto || window.msCrypto).getRandomValues(a);
+    id = Array.prototype.map.call(a, function(b){ return ("0" + b.toString(16)).slice(-2); }).join("");
+    try{ localStorage.setItem(k, id); }catch(e){}
+  }
+  return id;
+}
+function platform(){
+  var u = navigator.userAgent;
+  return /iPhone|iPod/.test(u) ? "iPhone" : /iPad/.test(u) ? "iPad" : /Android/.test(u) ? "Android" : /Mac/.test(u) ? "Mac" : /Windows/.test(u) ? "Windows" : "Other";
+}
+function track(kind, src){
+  if (!statsOn) return;
+  try{
+    fetch(CFG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/cc_track", {
+      method: "POST", keepalive: true,
+      headers: { "Content-Type": "application/json", apikey: CFG.supabaseAnonKey, Authorization: "Bearer " + CFG.supabaseAnonKey },
+      body: JSON.stringify({ p_device: deviceId(), p_kind: kind, p_src: src || null, p_platform: platform() })
+    }).then(function(r){ return r.ok ? r.json() : null; }).then(function(res){
+      if (!res || !res.ok) return;
+      $("bannedScreen").hidden = !res.banned;
+      if (res.banned){ stopNav(); $("bannedNote").textContent = res.note ? "Reason: " + res.note : ""; }
+    }).catch(function(){});
+  }catch(e){}
+}
+// A poster QR opens the app as ?src=library. Count it as a scan, then tidy the address.
+(function(){
+  var src = null;
+  try{ src = new URLSearchParams(location.search).get("src"); }catch(e){}
+  src = src ? src.toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 40) : "";
+  track(src ? "scan" : "open", src);
+  if (src){ try{ history.replaceState(null, "", location.pathname + location.hash); }catch(e){} }
+  setInterval(function(){ if (document.visibilityState === "visible") track("ping"); }, 60000);
+  document.addEventListener("visibilitychange", function(){ if (document.visibilityState === "visible") track("ping"); });
 })();
 
 /* ---------- boot ---------- */
