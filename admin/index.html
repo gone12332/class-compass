@@ -323,7 +323,12 @@ $("loginForm").addEventListener("submit", function(e){
     return rpc("cc_admin_stats", { p_tz: TZ });
   }).then(function(){ $("pass").value = ""; showDash(); }).catch(function(err){
     saveSession(null);
-    showLogin(err && err.code === "auth" ? "This account isn't the admin. Use the root user." : "Wrong username or password.");
+    var ec = err && (err.error_code || err.code);
+    showLogin(ec === "auth" ? "This account isn't the admin. Use the root user."
+      : ec === "email_not_confirmed" ? "This user isn't confirmed yet."
+      : ec === "invalid_credentials" || (err && err.error === "invalid_grant") ? "Wrong username or password."
+      : err instanceof TypeError ? "Can't reach the server. Check the internet."
+      : "Login failed: " + ((err && (err.msg || err.message || err.error_description)) || "unknown error"));
   }).then(function(){ $("loginBtn").disabled = !configured; });
 });
 $("logoutBtn").addEventListener("click", logout);
