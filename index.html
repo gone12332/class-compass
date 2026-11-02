@@ -385,6 +385,22 @@ legend{color:var(--amber);font-family:var(--body);text-transform:uppercase;font-
 input[type=range]{accent-color:var(--amber)}
 @media (prefers-reduced-motion:reduce){.greet::after,.hero-go::after{animation:none}}
 
+/* ---------- v6: floors ---------- */
+.floorbar{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font-size:.9rem;text-transform:uppercase;letter-spacing:.05em;color:var(--chalk-dim)}
+.floorbar b{font-family:var(--display);font-weight:400;font-size:1.6rem;color:var(--amber)}
+.btn.sm{min-height:36px;font-size:1.1rem;padding:2px 12px;box-shadow:2px 2px 0 var(--amber-dim)}
+.floorpick{border:2px solid var(--amber);background:var(--crt-2);padding:14px;display:flex;flex-direction:column;gap:10px;align-items:center;text-align:center}
+.leg{text-align:center;font-family:var(--display);font-size:1.5rem;text-transform:uppercase;color:var(--chalk);letter-spacing:.03em}
+.leg::before{content:"STEP ";color:var(--amber-dim)}
+.dial.climbing{box-shadow:0 0 0 2px var(--amber),0 0 40px 4px rgba(255,176,0,.3)}
+#climb{filter:drop-shadow(0 0 6px rgba(255,176,0,.9))}
+#climb.down{transform:rotate(180deg);transform-origin:100px 104px}
+@media (prefers-reduced-motion:no-preference){#climb path{animation:climbpulse 1s steps(2) infinite}#climb path+path{animation-delay:.5s}}
+@keyframes climbpulse{50%{opacity:.25}}
+label.check{flex-direction:row;align-items:center;gap:10px;text-transform:none;font-size:1rem;letter-spacing:0}
+label.check input{width:24px;height:24px;accent-color:var(--amber)}
+.badge.conn{font-size:1.1rem}
+
 /* ---------- v5: QR + ban screen ---------- */
 .qrbox{display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px;border:1px solid var(--amber-dim);background:#000}
 #shareQrImg{background:#fff;padding:12px;line-height:0;position:relative;z-index:31} /* above the scanlines so cameras can read it */
@@ -439,6 +455,8 @@ input[type=range]{accent-color:var(--amber)}
       </button>
       <h3 class="section-label" id="allLabel" hidden>All my classes</h3>
       <ul class="list" id="classList"></ul>
+      <h3 class="section-label" id="connLabel" hidden>Stairs and elevators</h3>
+      <ul class="list" id="connList"></ul>
 
       <div class="empty" id="emptyState" hidden>
         <h2>Add your first class</h2>
@@ -471,6 +489,16 @@ input[type=range]{accent-color:var(--amber)}
     </div>
 
     <h2 class="target-name" id="targetName">Room</h2>
+    <div class="floorbar" id="floorBar" hidden>
+      <span>You: <b id="fbYou">?</b></span><span aria-hidden="true">&rarr;</span><span>Room: <b id="fbRoom"></b></span>
+      <button type="button" class="btn sm" id="fbChange">Change</button>
+    </div>
+    <div class="floorpick" id="floorPick" hidden>
+      <p><b>Which floor are you on right now?</b></p>
+      <div class="days" id="floorBtns"></div>
+    </div>
+    <p class="leg" id="legLabel" hidden></p>
+    <div class="banner warn" id="floorNote" hidden><p id="floorNoteText"></p></div>
 
     <div id="startBox" class="banner">
       <h3>Ready to go?</h3>
@@ -524,6 +552,10 @@ input[type=range]{accent-color:var(--amber)}
             <path d="M100 28 L140 140 L100 116 L60 140 Z M100 28 L100 116" fill="none" stroke="#2a2610" stroke-width="2.5" stroke-linejoin="round"/>
           </g>
         </g>
+        <g id="climb" hidden>
+          <path d="M60 104 L100 64 L140 104" fill="none" stroke="#ffb000" stroke-width="12" stroke-linecap="square"/>
+          <path d="M60 144 L100 104 L140 144" fill="none" stroke="#ffb000" stroke-width="12" stroke-linecap="square" opacity=".55"/>
+        </g>
         <g id="star" hidden>
           <path d="M100 42 L115 82 L158 84 L124 110 L136 152 L100 128 L64 152 L76 110 L42 84 L85 82 Z" fill="#39ff7a" fill-opacity=".18" stroke="#39ff7a" stroke-width="3" stroke-linejoin="miter"/>
         </g>
@@ -531,6 +563,7 @@ input[type=range]{accent-color:var(--amber)}
     </div>
 
     <p class="say" id="say">Getting ready…</p>
+    <button type="button" class="btn primary wide" id="floorDone" hidden>I'm on floor 2 now</button>
 
     <div class="dist">
       <span class="big" id="distBig">--</span>
@@ -579,8 +612,17 @@ input[type=range]{accent-color:var(--amber)}
         <h2 id="editTitle" style="flex:1">Add a class</h2>
       </div>
 
-      <label for="fName">Class name
-        <span class="hint">Like "Room 12 Math" or "Gym"</span>
+      <fieldset style="border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:8px">
+        <legend style="font-weight:700;margin-bottom:8px">What is this spot?</legend>
+        <div class="days" id="kindPick">
+          <label><input type="radio" name="kind" id="kClass" value="class" checked><span>Class</span></label>
+          <label><input type="radio" name="kind" id="kStairs" value="stairs"><span>Stairs</span></label>
+          <label><input type="radio" name="kind" id="kElevator" value="elevator"><span>Elevator</span></label>
+        </div>
+      </fieldset>
+
+      <label for="fName"><span id="nameLabel">Class name</span>
+        <span class="hint" id="nameHint">Like "Room 12 Math" or "Gym"</span>
         <input type="text" id="fName" maxlength="40" autocomplete="off" required>
       </label>
 
@@ -597,15 +639,15 @@ input[type=range]{accent-color:var(--amber)}
       </label>
 
       <div class="row">
-        <label for="fTime" style="flex:1 1 140px">Class starts at <span class="hint">Optional</span>
+        <label for="fTime" style="flex:1 1 140px" id="timeWrap">Class starts at <span class="hint">Optional</span>
           <input type="time" id="fTime">
         </label>
-        <label for="fFloor" style="flex:1 1 140px">Floor <span class="hint">Optional</span>
+        <label for="fFloor" style="flex:1 1 140px"><span id="floorLabel">Floor</span> <span class="hint" id="floorHint">Needed for stairs directions, like 1, 2 or G</span>
           <input type="text" id="fFloor" maxlength="12" inputmode="text">
         </label>
       </div>
 
-      <fieldset style="border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:8px">
+      <fieldset style="border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:8px" id="daysWrap">
         <legend style="font-weight:700;margin-bottom:8px">School days <span class="hint" style="font-weight:400;color:var(--chalk-dim)">Leave all off for every day</span></legend>
         <div class="days" id="dayPick"></div>
       </fieldset>
@@ -661,6 +703,12 @@ input[type=range]{accent-color:var(--amber)}
     <div class="spot">
       <h3>Pick your arrow</h3>
       <div class="skins" id="skinPick" role="radiogroup" aria-label="Arrow style"></div>
+    </div>
+
+    <div class="spot">
+      <h3>Stairs or elevator</h3>
+      <label class="check" for="useElev"><input type="checkbox" id="useElev"> Use elevators instead of stairs</label>
+      <p class="muted small">Save stairs and elevators with "Add a class". When a class is on another floor, the arrow goes to the nearest one first.</p>
     </div>
 
     <div class="spot">
@@ -736,6 +784,20 @@ var LEVELS = [[0,"New explorer"],[5,"Hallway scout"],[15,"Map master"],[40,"Scho
 function levelFor(n){ var l = LEVELS[0]; LEVELS.forEach(function(x){ if (n >= x[0]) l = x; }); return l; }
 function nextLevel(n){ for (var i = 0; i < LEVELS.length; i++) if (LEVELS[i][0] > n) return LEVELS[i]; return null; }
 var DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+function isConn(c){ return c.kind === "stairs" || c.kind === "elevator"; }
+/* Floors are free text ("2", "G", "B1"). Turn them into numbers when we can, so we know up from down. */
+function floorNum(f){
+  f = String(f == null ? "" : f).trim().toLowerCase(); if (!f) return null;
+  if (/^(g|gr|ground|lobby|main)/.test(f)) return 0;
+  var b = f.match(/^(?:b|basement)\s*(\d*)$/); if (b) return -(+b[1] || 1);
+  var m = f.match(/-?\d+/); return m ? +m[0] : null;
+}
+function sameFloor(a, b){
+  if (!a || !b) return true;
+  var na = floorNum(a), nb = floorNum(b);
+  return na != null && nb != null ? na === nb : String(a).trim().toLowerCase() === String(b).trim().toLowerCase();
+}
+function floorName(f){ var n = floorNum(f); return n === 0 ? "ground floor" : "floor " + f; }
 function onToday(c){ return !c.days || !c.days.length || c.days.indexOf(new Date().getDay()) >= 0; }
 
 /* ---------- helpers ---------- */
@@ -790,7 +852,7 @@ function show(v){
 /* ---------- home ---------- */
 function nextClassId(){
   var now = minutesNow(), best = null, bestM = 1e9;
-  classes.forEach(function(c){ var m = toMin(c.time); if (onToday(c) && m != null && m >= now - 10 && m < bestM){ bestM = m; best = c.id; } });
+  classes.forEach(function(c){ var m = toMin(c.time); if (!isConn(c) && onToday(c) && m != null && m >= now - 10 && m < bestM){ bestM = m; best = c.id; } });
   return best;
 }
 function sortedClasses(){
@@ -808,7 +870,7 @@ function classRow(c, isNext, action){
   if (c.days && c.days.length && c.days.length < 7) meta.push(c.days.slice().sort().map(function(d){ return DAYS[d]; }).join(" "));
   if (prefs.stars[c.id]) meta.push("\u2605 " + prefs.stars[c.id]);
   return '<li><button class="class' + (isNext ? ' next' : '') + '" data-id="' + esc(c.id) + '" data-act="' + action + '" aria-label="' + esc((action === "go" ? "Go to " : "Edit ") + c.name) + '">' +
-    '<span class="badge" style="background:' + esc(c.color || COLORS[0]) + '">' + esc(initials(c.name)) + '</span>' +
+    '<span class="badge' + (isConn(c) ? ' conn' : '') + '" style="background:' + esc(c.color || COLORS[0]) + '">' + esc(c.kind === "stairs" ? "STR" : c.kind === "elevator" ? "ELV" : initials(c.name)) + '</span>' +
     '<span class="text">' + (isNext ? '<span class="pill">Next up</span><br>' : '') +
     '<span class="name">' + esc(c.name) + '</span>' + (meta.length ? '<br><span class="meta">' + esc(meta.join(" · ")) + '</span>' : '') + '</span>' +
     (action === "go" ? '<span class="go" aria-hidden="true"></span>' : '<span class="go edit">Edit</span>') + '</button></li>';
@@ -829,13 +891,20 @@ function renderHome(){
     $("heroName").textContent = nc.name;
     $("heroNote").textContent = [nc.floor ? "Floor " + nc.floor : "", nc.notes || ""].filter(Boolean).join(" · ");
   }
-  var rest = sortedClasses().filter(function(c){ return c.id !== next; });
+  var rest = sortedClasses().filter(function(c){ return c.id !== next && !isConn(c); });
+  var conns = sortedClasses().filter(isConn);
   $("allLabel").hidden = !(nc && rest.length);
   $("classList").innerHTML = rest.map(function(c){ return classRow(c, false, "go"); }).join("");
+  $("connLabel").hidden = !conns.length;
+  $("connList").innerHTML = conns.map(function(c){ return classRow(c, false, "go"); }).join("");
   $("emptyState").hidden = classes.length > 0;
   $("homeLead").hidden = classes.length === 0;
   $("secureBanner").hidden = secure;
 }
+$("connList").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-id]"); if (!b) return;
+  var c = classes.find(function(x){ return x.id === b.dataset.id; }); if (c) openCompass(c, false);
+});
 $("classList").addEventListener("click", function(e){
   var b = e.target.closest("button[data-id]"); if (!b) return;
   var c = classes.find(function(x){ return x.id === b.dataset.id; }); if (c) openCompass(c, false);
@@ -853,7 +922,7 @@ function b64urlEncode(str){ return btoa(unescape(encodeURIComponent(str))).repla
 function b64urlDecode(s){ s = s.replace(/-/g,"+").replace(/_/g,"/"); while (s.length % 4) s += "="; return decodeURIComponent(escape(atob(s))); }
 function packClasses(){
   return b64urlEncode(JSON.stringify(classes.map(function(c){
-    return [c.name, +c.lat.toFixed(6), +c.lon.toFixed(6), c.notes || "", c.time || "", c.floor || "", c.color || "", (c.days || []).join("")];
+    return [c.name, +c.lat.toFixed(6), +c.lon.toFixed(6), c.notes || "", c.time || "", c.floor || "", c.color || "", (c.days || []).join(""), c.kind || ""];
   })));
 }
 function checkImport(src){
@@ -866,7 +935,8 @@ function checkImport(src){
       return { id: uid(), name: String(a[0]).slice(0,40), lat: +a[1], lon: +a[2], notes: String(a[3]||"").slice(0,300),
                time: /^\d\d:\d\d$/.test(a[4]) ? a[4] : "", floor: String(a[5]||"").slice(0,12),
                color: COLORS.indexOf(a[6]) >= 0 ? a[6] : COLORS[0],
-               days: String(a[7] || "").split("").map(Number).filter(function(d){ return d >= 0 && d <= 6; }) };
+               days: String(a[7] || "").split("").map(Number).filter(function(d){ return d >= 0 && d <= 6; }),
+               kind: a[8] === "stairs" || a[8] === "elevator" ? a[8] : undefined };
     }).filter(validClass);
   }catch(e){ pendingImport = null; }
   if (pendingImport && pendingImport.length){
@@ -933,6 +1003,17 @@ function setSpotUI(state, text, pct){
 function describeSpot(s){
   return "Spot saved (about ±" + Math.max(1, Math.round(s.acc || 0)) + " m)";
 }
+function curKind(){ var k = document.querySelector('input[name=kind]:checked'); return k ? k.value : "class"; }
+function kindUI(){
+  var k = curKind(), cls = k === "class";
+  $("nameLabel").textContent = cls ? "Class name" : k === "stairs" ? "Stairs name" : "Elevator name";
+  $("nameHint").textContent = cls ? 'Like "Room 12 Math" or "Gym"' : 'Like "Blue stairs" or "Stairs by the gym"';
+  $("timeWrap").hidden = !cls; $("daysWrap").hidden = !cls;
+  $("floorLabel").textContent = cls ? "Floor" : "Floor you saved it on";
+  $("spotHelp").textContent = cls ? "Stand at the classroom door, then tap the button. Hold still while it listens." : "Stand at the bottom or top of the " + (k === "stairs" ? "stairs" : "elevator") + ", then tap the button.";
+  if (!editing) $("editTitle").textContent = cls ? "Add a class" : k === "stairs" ? "Add stairs" : "Add an elevator";
+}
+document.querySelectorAll("input[name=kind]").forEach(function(r){ r.addEventListener("change", kindUI); });
 $("dayPick").innerHTML = [1,2,3,4,5,6,0].map(function(d){
   return '<label><input type="checkbox" id="day' + d + '" value="' + d + '"><span>' + DAYS[d] + '</span></label>';
 }).join("");
@@ -944,6 +1025,7 @@ function openEdit(c){
   $("fNotes").value = c ? (c.notes || "") : "";
   $("fTime").value = c ? (c.time || "") : "";
   $("fFloor").value = c ? (c.floor || "") : "";
+  $(c && c.kind === "stairs" ? "kStairs" : c && c.kind === "elevator" ? "kElevator" : "kClass").checked = true; kindUI();
   for (var di = 0; di < 7; di++) $("day" + di).checked = !!(c && c.days && c.days.indexOf(di) >= 0);
   $("fCoords").value = c ? c.lat.toFixed(6) + ", " + c.lon.toFixed(6) : "";
   var col = c && c.color ? c.color : COLORS[classes.length % COLORS.length];
@@ -1007,13 +1089,14 @@ $("form").addEventListener("submit", function(e){
     if (!pc) err = "The latitude, longitude doesn't look right. Use two numbers with a comma, like 40.7128, -74.0060.";
     else if (!spot || Math.abs(pc.lat - spot.lat) > 1e-6 || Math.abs(pc.lon - spot.lon) > 1e-6) place = { lat: pc.lat, lon: pc.lon, acc: 0 };
   }
-  if (!name) err = "Give the class a name, like \"Room 12 Math\".";
+  if (!name) err = curKind() === "class" ? "Give the class a name, like \"Room 12 Math\"." : "Give it a name, like \"Blue stairs\".";
   else if (!place && !err) err = "Save the spot first. Stand at the classroom door and tap \"Save this spot\".";
   if (err){ $("formErr").textContent = err; $("formErr").hidden = false; return; }
   stopSpot();
   var colorEl = document.querySelector('input[name=color]:checked');
   var data = { name: name.slice(0,40), lat: place.lat, lon: place.lon, acc: place.acc || 0,
-    notes: $("fNotes").value.trim(), time: $("fTime").value || "", floor: $("fFloor").value.trim(),
+    notes: $("fNotes").value.trim(), time: curKind() === "class" ? ($("fTime").value || "") : "", floor: $("fFloor").value.trim(),
+    kind: curKind() === "class" ? undefined : curKind(),
     days: [0,1,2,3,4,5,6].filter(function(d){ return $("day" + d).checked; }),
     color: colorEl ? colorEl.value : COLORS[0] };
   if (editing) Object.assign(editing, data); else classes.push(Object.assign({ id: uid() }, data));
@@ -1027,7 +1110,7 @@ $("delYes").addEventListener("click", function(){
 });
 
 /* ---------- compass ---------- */
-var wasOn = false, lastOnAt = 0, tripStart = null, target = null, demo = false, here = null, geoWatch = null;
+var leg = "room", via = null, atConn = false, wasOn = false, lastOnAt = 0, tripStart = null, target = null, demo = false, here = null, geoWatch = null;
 var heading = null, headingSrc = null, hx = 0, hy = 0, lastOrientAt = 0, iosAcc = null, tilt = 0;
 var shownArrow = 0, shownRose = 0, arrivedOnce = false, wakeLock = null, raf = null, started = false;
 var speak = false, lastSpoken = "", lastSpokenAt = 0;
@@ -1036,8 +1119,13 @@ try{ speak = localStorage.getItem(KEY + ".speak") === "1"; }catch(e){}
 function openCompass(c, isDemo){
   tripStart = null; $("trip").hidden = true; $("dial").classList.remove("ontarget"); $("say").classList.remove("ontarget");
   wasOn = false; $("distSteps").dataset.star = ""; $("onTime").hidden = true;
+  leg = "room"; via = null; atConn = false;
+  $("floorDone").hidden = true; $("legLabel").hidden = true; $("floorNote").hidden = true; $("floorPick").hidden = true;
+  $("climb").setAttribute("hidden", ""); $("dial").classList.remove("climbing");
   target = c; demo = isDemo; here = null; fixAt = 0; walkAt = 0; tipLocked = false; $("arrow").style.opacity = 1; heading = null; headingSrc = null; arrivedOnce = false; started = false;
   $("targetName").textContent = c.name;
+  renderFloorBar();
+  if (!isDemo && !isConn(c) && c.floor && !prefs.floor) showFloorPick();
   $("notesBody").textContent = c.notes || "";
   $("notesBox").hidden = !c.notes;
   $("demoChip").hidden = !isDemo; $("demoControls").hidden = !isDemo;
@@ -1052,6 +1140,61 @@ function openCompass(c, isDemo){
   if (isDemo) beginDemo();
   else if (permissionsLikelyGranted()) beginNav(false);
 }
+/* ---------- floors ---------- */
+function knownFloors(){
+  var seen = {}, out = [];
+  classes.concat(target ? [target] : []).forEach(function(c){ if (c.floor && !seen[String(c.floor).toLowerCase()]){ seen[String(c.floor).toLowerCase()] = 1; out.push(String(c.floor)); } });
+  return out.sort(function(a, b){ var x = floorNum(a), y = floorNum(b); return (x == null ? 99 : x) - (y == null ? 99 : y); });
+}
+function renderFloorBar(){
+  var show = !!(target && !demo && !isConn(target) && target.floor);
+  $("floorBar").hidden = !show; if (!show) return;
+  $("fbYou").textContent = prefs.floor || "?"; $("fbRoom").textContent = target.floor;
+}
+function showFloorPick(){
+  $("floorBtns").innerHTML = knownFloors().map(function(f){
+    return '<label><input type="radio" name="curFloor" value="' + esc(f) + '"' + (prefs.floor === f ? " checked" : "") + '><span>' + esc(f) + '</span></label>';
+  }).join("");
+  $("floorPick").hidden = false;
+}
+$("fbChange").addEventListener("click", function(){ if ($("floorPick").hidden) showFloorPick(); else $("floorPick").hidden = true; });
+$("floorBtns").addEventListener("change", function(e){ setFloor(e.target.value); $("floorPick").hidden = true; });
+function setFloor(f){
+  prefs.floor = f; savePrefs(); renderFloorBar();
+  leg = "room"; via = null; atConn = false; tripStart = null; arrivedOnce = false; planRoute();
+}
+/* Pick the stairs (or elevator) that makes the whole walk shortest: here -> stairs -> room. */
+function planRoute(){
+  $("floorNote").hidden = true;
+  if (!target || demo || isConn(target) || !target.floor || !prefs.floor || sameFloor(prefs.floor, target.floor)){
+    if (leg === "connector"){ leg = "room"; via = null; }
+    return;
+  }
+  var want = prefs.elevator ? "elevator" : "stairs", other = want === "stairs" ? "elevator" : "stairs";
+  var pool = classes.filter(function(c){ return c.kind === want; });
+  if (!pool.length) pool = classes.filter(function(c){ return c.kind === other; });
+  if (!pool.length){
+    leg = "room"; via = null;
+    $("floorNoteText").textContent = target.name + " is on " + floorName(target.floor) + " and you're on " + floorName(prefs.floor) + ". Find the stairs first. Tip: save the stairs as a spot and the arrow will take you there.";
+    $("floorNote").hidden = false; return;
+  }
+  var from = here || pool[0];
+  pool.sort(function(a, b){ return (distanceM(from, a) + distanceM(a, target)) - (distanceM(from, b) + distanceM(b, target)); });
+  via = pool[0]; leg = "connector";
+}
+function climbWord(){
+  var a = floorNum(prefs.floor), b = floorNum(target.floor);
+  if (a == null || b == null) return "Go to " + floorName(target.floor);
+  var n = Math.abs(b - a), dir = b > a ? "UP" : "DOWN";
+  return "Go " + dir + " " + (n === 1 ? "1 floor" : n + " floors") + " to " + floorName(target.floor);
+}
+$("floorDone").addEventListener("click", function(){
+  prefs.floor = target.floor; savePrefs(); renderFloorBar();
+  leg = "room"; via = null; atConn = "done"; tripStart = null; arrivedOnce = false;
+  $("floorDone").hidden = true; $("climb").setAttribute("hidden", ""); $("dial").classList.remove("climbing");
+  chime([659, 784]); say("Now find " + target.name);
+});
+
 /* Android/desktop don't need a tap for motion; iOS does, so it always shows the Start button first. */
 function permissionsLikelyGranted(){
   return !(window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === "function") && sessionReady;
@@ -1220,12 +1363,31 @@ function tick(){
   if (!demo && fixAt && now - fixAt > 15000) setChip("gps", "warn", "Location: looking…");
   else setChip("gps", acc <= 12 ? "good" : acc <= 30 ? "warn" : "bad", "Location: ±" + Math.round(acc) + " m");
 
-  var d = distanceM(here, target), b = bearingDeg(here, target);
+  if (atConn !== "done" && !via && !demo && !isConn(target) && target.floor && prefs.floor && !sameFloor(prefs.floor, target.floor)) planRoute();
+  var dest = leg === "connector" && via ? via : target;
+  var d = distanceM(here, dest), b = bearingDeg(here, dest);
   var arriveR = Math.max(6, Math.min(acc, 15));
+  var routed = !!(via || atConn === "done") && !demo && !isConn(target) && !!target.floor;
+  $("legLabel").hidden = !routed;
+  if (routed) $("legLabel").textContent = leg === "connector" ? (atConn ? "2 of 3: take the " + (via.kind === "elevator" ? "elevator" : "stairs") : "1 of 3: walk to " + via.name) : "3 of 3: walk to " + target.name;
+
+  // At the stairs: show the up/down step and wait for the kid to say they've changed floor.
+  if (leg === "connector" && via && (atConn || d <= arriveR)){
+    if (!atConn){ atConn = true; chime([523, 784]); buzz([80, 60, 80]); say(climbWord()); }
+    var up = floorNum(target.floor) == null || floorNum(prefs.floor) == null || floorNum(target.floor) >= floorNum(prefs.floor);
+    $("climb").removeAttribute("hidden"); $("climb").classList.toggle("down", !up);
+    $("arrow").setAttribute("hidden", ""); $("star").setAttribute("hidden", ""); $("trip").hidden = true; $("onTime").hidden = true;
+    $("dial").classList.add("climbing"); $("dial").classList.remove("ontarget", "arrived"); $("say").classList.remove("ontarget");
+    setSay(climbWord());
+    $("distBig").textContent = target.floor; $("distSteps").textContent = via.kind === "elevator" ? "take the elevator" : "take the " + via.name;
+    $("floorDone").textContent = "I'm on " + floorName(target.floor) + " now"; $("floorDone").hidden = false;
+    return;
+  }
+  $("climb").setAttribute("hidden", ""); $("dial").classList.remove("climbing");
 
   if (d <= arriveR){
     if (!arrivedOnce){
-      arrivedOnce = true; celebrate(); chime([523, 659, 784, 1047]); say("You made it to " + target.name + "!");
+      arrivedOnce = true; if (target.floor && !isConn(target) && !demo){ prefs.floor = target.floor; savePrefs(); renderFloorBar(); } celebrate(); chime([523, 659, 784, 1047]); say("You made it to " + target.name + "!");
       if (!demo){
         var before = levelFor(prefs.total)[1];
         track("arrive");
@@ -1249,10 +1411,11 @@ function tick(){
   $("trip").hidden = tripStart < arriveR + 10;
   $("tripFill").style.width = (prog * 100).toFixed(1) + "%"; $("tripDot").style.left = (prog * 100).toFixed(1) + "%";
   $("tripText").textContent = prog < 0.05 ? "Let's go!" : prog < 0.5 ? Math.round(prog * 100) + "% of the way" : prog < 0.85 ? "More than halfway! " + Math.round(prog * 100) + "%" : "Almost there!";
+  var dTotal = d + (dest !== target ? distanceM(dest, target) + 25 : 0); // about 25 m extra for a flight of stairs
   $("tmark").style.transform = "rotate(" + b + "deg)"; $("tmark").style.transformOrigin = "100px 100px";
   var ot = $("onTime"), tm = toMin(target.time);
-  if (tm != null && onToday(target) && d < 2000){
-    var walk = Math.max(1, Math.ceil(d / 1.1 / 60)), left = tm - minutesNow();
+  if (tm != null && onToday(target) && dTotal < 2000){
+    var walk = Math.max(1, Math.ceil(dTotal / 1.1 / 60)), left = tm - minutesNow();
     ot.hidden = left < -15;
     ot.className = "ontime " + (left - walk >= 2 ? "good" : left - walk >= 0 ? "warn" : "bad");
     ot.textContent = left - walk >= 2 ? "You'll make it! " + walk + " min walk, class in " + left + " min"
@@ -1343,6 +1506,8 @@ $("skinPick").addEventListener("click", function(e){
   prefs.skin = b.dataset.skin; savePrefs(); applySkin(); toast(b.textContent + " picked");
 });
 applySkin();
+$("useElev").checked = !!prefs.elevator;
+$("useElev").addEventListener("change", function(){ prefs.elevator = this.checked; savePrefs(); toast(this.checked ? "Elevators first" : "Stairs first"); });
 
 /* ---------- sounds ---------- */
 var actx = null;
