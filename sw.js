@@ -1,6 +1,6 @@
 // Keeps Class Compass working when the school wifi is weak or off.
 // Network first for the page so updates show up; cached copy when offline.
-var CACHE = "class-compass-v11";
+var CACHE = "class-compass-v12";
 var FILES = ["./", "./index.html", "./config.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 self.addEventListener("install", function(e){
   e.waitUntil(caches.open(CACHE).then(function(c){ return c.addAll(FILES); }).then(function(){ return self.skipWaiting(); }));
@@ -24,4 +24,12 @@ self.addEventListener("fetch", function(e){
   e.respondWith(fetch(req).then(function(res){
     var copy = res.clone(); caches.open(CACHE).then(function(c){ c.put(req, copy); }); return res;
   }).catch(function(){ return caches.match(req, { ignoreSearch: true }).then(function(hit){ return hit || caches.match("./index.html"); }); }));
+});
+// Tapping a class reminder opens (or focuses) the app.
+self.addEventListener("notificationclick", function(e){
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(function(list){
+    for (var i = 0; i < list.length; i++) if ("focus" in list[i]) return list[i].focus();
+    return self.clients.openWindow("./");
+  }));
 });

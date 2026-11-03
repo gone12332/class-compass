@@ -4,13 +4,13 @@ For anyone picking up Class Compass, including another AI assistant. Read this b
 
 ## What it is
 
-A static web app for kids who have trouble finding classrooms. A kid saves each classroom by standing at its door (GPS), then picks a class and follows an arrow (phone compass + GPS). Hosted on GitHub Pages. No build step and no framework; everything is plain HTML/CSS/JS.
+A static web app for students who have trouble finding classrooms. A student saves each classroom by standing at its door (GPS), then picks a class and follows an arrow (phone compass + GPS). Hosted on GitHub Pages. No build step and no framework; everything is plain HTML/CSS/JS.
 
 ## Rules that must not break
 
 1. **Never lose saved data.** Classes live in `localStorage["classCompass.v1"]` as an array of `{id, name, lat, lon, acc, notes, time, floor, color, days, kind}` (`kind` is `"stairs"`, `"elevator"` or missing for a class). Do not rename the key or change existing fields; only add optional ones. Prefs (arrow style, stars, current floor, elevator preference) are in `classCompass.v1.prefs`; the anonymous phone ID is in `classCompass.v1.device`.
 2. **No secrets in the repo.** It's public. The admin password lives only in Supabase Auth. The anon key in `config.js` is public by design and can only call `cc_track()`.
-3. **Kids' privacy.** Stats are anonymous: a random phone ID, event kinds (`open`, `scan`, `trip`, `arrive`), the poster spot name, phone type. Never send names, GPS coordinates or class names.
+3. **Student privacy.** Stats are anonymous: a random phone ID, event kinds (`open`, `scan`, `trip`, `arrive`), the poster spot name, phone type. Never send names, GPS coordinates or class names.
 4. **Needs HTTPS.** Phones only allow GPS and compass on https pages. Opening the file directly won't work.
 5. **Deploy = push to `gh-pages`:** `git push origin main main:gh-pages`. Bump `CACHE` in `sw.js` on every release so phones pick up changes.
 
@@ -33,6 +33,14 @@ There's no test suite in the repo. What was used: Playwright with Chromium, a lo
 
 ## Ideas not done yet
 
-- Automatic floor detection (phones' web browsers don't expose the barometer, so the kid confirms the floor change).
+- Automatic floor detection (phones' web browsers don't expose the barometer, so the user confirms the floor change).
 - Teacher-made room lists for the whole school, loaded from Supabase instead of per phone.
 - Indoor accuracy: Bluetooth beacons or Wi-Fi positioning would beat GPS but need hardware.
+
+## v8 (2026-11-03): grown-up look and new features
+- Default look is a clean modern dark style (`html.pro`, Inter font, accent color in `prefs.accent`: blue/teal/amber/violet/rose). The old retro amber terminal look is still there: `prefs.look = "retro"` sets `html.retro`. The `.pro` CSS layer at the end of the stylesheet overrides the retro layer.
+- Stars, levels and confetti are gone. `prefs.total` is now "trips finished" and `prefs.stars[id]` is a per-place visit count (kept for old data). `prefs.walked` adds up guided distance.
+- New optional class field `teacher` (also index 9 in the share link).
+- Home: search box and All/Today filter (shown from 4 classes).
+- Settings: stats, style/accent/arrow, units (`prefs.units` "m"/"ft"), show other places on the dial (`prefs.others`), vibration (`prefs.haptics`), class reminders (`prefs.remind` minutes, Notification API, sw.js handles notification taps), backup export/import as JSON.
+- Compass: other saved places within 200 m are drawn as dots on the dial (`drawOthers`), subtitle shows teacher/time/floor, arrival shows trip time and a check mark.

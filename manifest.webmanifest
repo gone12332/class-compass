@@ -1,7 +1,7 @@
 {
   "name": "Class Compass",
   "short_name": "Class Compass",
-  "description": "A big arrow that points kids to their next classroom.",
+  "description": "A compass arrow that guides you to your next classroom.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

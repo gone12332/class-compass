@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="pro">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -9,12 +9,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Class Compass">
 <title>Class Compass</title>
+<script>try{var _p=JSON.parse(localStorage.getItem("classCompass.v1.prefs")||"{}");if(_p.look==="retro"){document.documentElement.className="retro";}else if(_p.accent){document.documentElement.dataset.accent=_p.accent;}}catch(e){}</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap">
 <style>
 /* Layout: one column, phone first. A chalkboard with a chalk-yellow arrow. */
 :root{
@@ -412,6 +413,137 @@ label.check input{width:24px;height:24px;accent-color:var(--amber)}
 .banned-screen{position:fixed;inset:0;z-index:40;background:var(--crt);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;
   padding:max(24px,env(safe-area-inset-top,0px)) max(24px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(24px,env(safe-area-inset-left,0px))}
 .banned-screen h2{color:var(--red);text-shadow:0 0 10px rgba(255,77,61,.6);font-size:2.6rem}
+
+/* ---------- v8: modern look (default). The retro terminal look is kept for html.retro ---------- */
+html.pro{
+  --accent:#3b82f6; --on-accent:#ffffff;
+  --crt:#0b0d10; --crt-2:#14181d; --amber:var(--accent); --amber-dim:#262d36; --amber-faint:rgba(255,255,255,.04);
+  --board:var(--crt); --board-2:var(--crt-2); --board-3:var(--amber-dim);
+  --chalk:#e8eaed; --chalk-dim:#98a2ad; --yellow:var(--accent); --yellow-ink:var(--on-accent); --yellow-deep:var(--amber-dim);
+  --green:#34d399; --red:#f87171; --good:var(--green); --warn:#fbbf24; --bad:var(--red);
+  --display:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; --body:var(--display); --r:14px;
+}
+html.pro[data-accent="teal"]{--accent:#2dd4bf;--on-accent:#04201c}
+html.pro[data-accent="amber"]{--accent:#fbbf24;--on-accent:#1a1300}
+html.pro[data-accent="violet"]{--accent:#8b5cf6;--on-accent:#ffffff}
+html.pro[data-accent="rose"]{--accent:#fb7185;--on-accent:#2a0a10}
+.pro body{background:var(--crt);background-image:none;font-size:16px;color:var(--chalk)}
+.pro body::after{display:none}
+.pro *{text-shadow:none!important}
+.pro h1,.pro h2,.pro h3,.pro .target-name,.pro .hero-name{font-family:var(--display);font-weight:700;color:var(--chalk);text-transform:none;letter-spacing:-.01em}
+.pro h1{font-size:1.45rem}.pro h2{font-size:1.4rem}.pro h3{font-size:1.05rem;font-weight:600}
+.pro .glow{filter:none}
+.pro .brand svg *{stroke:var(--accent)}
+.pro :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.pro .btn{border-radius:12px;border:1px solid var(--amber-dim);background:var(--crt-2);color:var(--chalk);font-family:var(--display);font-weight:600;font-size:1rem;text-transform:none;letter-spacing:0;box-shadow:none;min-height:50px}
+.pro .btn:active{transform:scale(.98);box-shadow:none}
+.pro .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent);box-shadow:none}
+.pro .btn.primary:active{box-shadow:none}
+.pro .btn.ghost{background:transparent;border-style:solid;border-color:var(--amber-dim)}
+.pro .btn.danger{background:transparent;border-color:rgba(248,113,113,.45);color:var(--red);box-shadow:none}
+.pro .btn.sm{min-height:34px;font-size:.85rem;border-radius:8px;padding:2px 12px}
+.pro .iconbtn{border-radius:12px;border:1px solid var(--amber-dim);background:var(--crt-2);color:var(--chalk);box-shadow:none;width:44px;height:44px}
+.pro .iconbtn:active{transform:scale(.96);box-shadow:none}
+.pro .greet{font-family:var(--display);font-size:1rem;color:var(--chalk-dim)}
+.pro .greet span{color:var(--chalk);font-weight:600}
+.pro .greet::before,.pro .greet::after,.pro .section-label::before,.pro .notes .label::before,.pro .say::before,.pro .hero-go::after{content:none}
+.pro .section-label{color:var(--chalk-dim);font-family:var(--display);font-size:.72rem;letter-spacing:.08em;font-weight:600}
+.pro .hero{border-radius:16px;background:var(--crt-2);color:var(--chalk);border:1px solid var(--amber-dim);border-left:4px solid var(--accent);box-shadow:none}
+.pro .hero:active{transform:scale(.99);box-shadow:none}
+.pro .pill,.pro .hero .pill{background:var(--accent);color:var(--on-accent);border-radius:6px;font-size:.68rem;padding:2px 8px}
+.pro .hero-top{color:var(--chalk-dim);text-transform:none;letter-spacing:0;font-size:.9rem}
+.pro .hero-name{font-size:1.75rem;line-height:1.15}
+.pro .hero-go{border-radius:10px;border:0;background:var(--accent);color:var(--on-accent);font-family:var(--display);font-size:.95rem;font-weight:600;text-transform:none;padding:9px 14px}
+.pro .hero-go svg{display:inline}
+.pro .class{border-radius:14px;background:var(--crt-2);border:1px solid var(--amber-dim);padding:12px;min-height:68px}
+.pro .class:hover,.pro .class:active{background:#1a1f26}
+.pro .class .name{font-family:var(--display);font-weight:600;font-size:1.05rem;color:var(--chalk);line-height:1.25}
+.pro .class .meta{font-size:.82rem}
+.pro .badge,.retro .badge{border-color:var(--c,currentColor);color:var(--c,inherit)}
+.pro .badge{border-radius:10px;border-width:1.5px;font-family:var(--display);font-weight:700;font-size:.9rem;width:44px;height:44px}
+.pro .class{grid-template-columns:44px 1fr auto}
+.pro .class .go{color:var(--chalk-dim)}
+.pro .class .go.edit{border-radius:8px;font-family:var(--display);font-size:.85rem;text-transform:none}
+.pro .empty,.pro .spot,.pro details,.pro .notes,.pro .banner{border-radius:14px;background:var(--crt-2);border:1px solid var(--amber-dim)}
+.pro .banner{border-color:var(--accent)}.pro .banner.warn{border-color:var(--warn)}.pro .banner.bad{border-color:var(--red)}
+.pro .empty{border-style:dashed}
+.pro .notes .label{color:var(--chalk-dim);font-size:.72rem}
+.pro input[type=text],.pro input[type=time],.pro input[type=search],.pro textarea,.pro select{border-radius:10px;background:#0f1216;border:1px solid var(--amber-dim);color:var(--chalk);font-family:var(--display);caret-color:var(--accent)}
+.pro input[type=text]:focus,.pro input[type=time]:focus,.pro input[type=search]:focus,.pro textarea:focus,.pro select:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 28%,transparent);outline:none}
+.pro ::placeholder{color:#5f6873}
+.pro label,.pro legend{font-family:var(--display);text-transform:none;letter-spacing:0;font-size:.9rem;font-weight:600;color:var(--chalk)}
+.pro .swatch{border-radius:10px}
+.pro .days span{border-radius:10px;font-family:var(--display);font-size:.9rem;font-weight:600;text-transform:none;min-width:46px;height:42px;color:var(--chalk-dim)}
+.pro .days input:checked+span{background:var(--accent);color:var(--on-accent);box-shadow:none;border-color:var(--accent)}
+.pro .skin-btn{border-radius:12px;font-family:var(--display);font-size:.9rem;font-weight:600;text-transform:none;color:var(--chalk)}
+.pro .skin-btn[aria-checked="true"]{border:2px solid var(--accent);background:rgba(255,255,255,.04);box-shadow:none}
+.pro .skin-btn path,.pro .skin-btn circle{stroke:var(--accent)!important}
+.pro .meter{border-radius:999px;background:#0f1216}.pro .meter>i{background:var(--accent)}
+.pro .toast{border-radius:12px;background:var(--chalk);color:#0b0d10;font-family:var(--display);font-size:.95rem;font-weight:600;text-transform:none;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.pro .dot{border-radius:50%}
+.pro .chip{border-radius:999px;font-size:.78rem;text-transform:none;letter-spacing:0;background:var(--crt-2)}
+.pro .target-name{font-size:1.85rem;line-height:1.15}
+.pro .dial{filter:none}
+.pro .dial svg [stroke="#ffb000"]{stroke:var(--chalk)}
+.pro .dial svg text[fill="#ffb000"]{fill:var(--chalk-dim);fill-opacity:1}
+.pro .dial svg text{font-family:var(--display);font-weight:600;font-size:13px}
+.pro .dial svg text[fill="#ff4d3d"]{fill:var(--red);font-size:16px}
+.pro #face stop{stop-color:#12161b}
+.pro #tmark rect{fill:var(--accent);stroke:var(--crt)}
+.pro #arrow{filter:none}
+.pro #arrow path[stroke],.pro #arrow circle[stroke]{stroke:var(--accent)}
+.pro .dial .n-light{fill:color-mix(in srgb,var(--accent) 22%,transparent)}
+.pro .dial .n-dark{fill:color-mix(in srgb,var(--accent) 50%,transparent)}
+.pro #arrow .skin[data-skin="needle"] circle{fill:var(--crt);stroke:var(--accent)}
+.pro #arrow .skin[data-skin="needle"] circle + circle{fill:var(--accent);stroke:none}
+.pro .dial.ontarget .n-light{fill:rgba(52,211,153,.22)}.pro .dial.ontarget .n-dark{fill:rgba(52,211,153,.5)}
+.pro .dial.ontarget,.pro .dial.arrived{box-shadow:0 0 0 3px var(--green);animation:none}
+.pro #star{filter:none}
+.pro #climb{filter:none}.pro #climb path{stroke:var(--accent)}
+.pro .dial.climbing{box-shadow:0 0 0 3px var(--accent)}
+.pro .say{border-radius:12px;border:0;background:var(--crt-2);color:var(--chalk);font-family:var(--display);font-weight:600;font-size:1.2rem;text-transform:none;padding:10px 18px}
+.pro .say.ontarget,.pro .say.arrived{color:var(--green);border:0;background:rgba(52,211,153,.12)}
+.pro .dist .big{font-family:var(--display);font-weight:700;font-size:3.2rem;color:var(--chalk);letter-spacing:-.02em;line-height:1}
+.pro .dist .steps{text-transform:none;letter-spacing:0;font-size:.95rem}
+.pro .ontime{border-radius:999px;text-transform:none;letter-spacing:0}
+.pro .trip-bar{border-radius:999px;height:8px;background:#1d232a;border:0}
+.pro .trip-bar i{border-radius:999px;background:var(--accent);box-shadow:none}
+.pro .trip-bar b{border-radius:50%;width:14px;height:14px;margin:-7px 0 0 -7px;background:var(--chalk);box-shadow:none}
+.pro .trip span{text-transform:none;letter-spacing:0;font-size:.85rem}
+.pro .hdg{text-transform:none;letter-spacing:.04em}
+.pro .hdg b{font-family:var(--display);font-weight:600;font-size:1.05rem;color:var(--chalk)}
+.pro .floorbar{text-transform:none;letter-spacing:0}
+.pro .floorbar b{font-family:var(--display);font-weight:700;font-size:1.1rem;color:var(--chalk)}
+.pro .floorpick{border-radius:14px;border:1px solid var(--accent)}
+.pro .leg{font-family:var(--display);font-size:1rem;font-weight:600;text-transform:none}
+.pro .leg::before{content:"Step ";color:var(--chalk-dim)}
+.pro .qrbox{border-radius:14px;background:var(--crt-2)}
+.pro .sharebox{color:var(--chalk)}
+
+/* ---------- v8: new features ---------- */
+.tools{display:flex;flex-direction:column;gap:10px}
+input[type=search]{width:100%;min-height:46px;padding:10px 14px;font-size:1rem;-webkit-appearance:none;appearance:none}
+.retro input[type=search],.retro select{border-radius:0;background:#000;border:1px solid var(--amber-dim);color:var(--amber);font-family:var(--body)}
+select{min-height:46px;padding:8px 12px;font-size:1rem;width:100%}
+.seg{display:flex;border:1px solid var(--amber-dim);border-radius:12px;overflow:hidden;align-self:flex-start}
+.retro .seg{border-radius:0}
+.seg button{border:0;background:transparent;padding:8px 16px;font-weight:600;color:var(--chalk-dim);min-height:40px}
+.seg button[aria-pressed="true"]{background:var(--amber);color:var(--yellow-ink)}
+.retro .seg button{font-family:var(--display);font-size:1.3rem;text-transform:uppercase}
+.retro .seg button[aria-pressed="true"]{color:#050505}
+.accents{display:flex;gap:10px;flex-wrap:wrap}
+.accents button{width:40px;height:40px;border-radius:50%;border:2px solid transparent;background:var(--sw)}
+.accents button[aria-pressed="true"]{border-color:var(--chalk);box-shadow:0 0 0 2px var(--crt) inset}
+.statgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.stat{border:1px solid var(--amber-dim);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:2px}
+.stat b{font-family:var(--display);font-size:1.5rem;color:var(--amber);overflow-wrap:anywhere}
+.pro .stat b{font-size:1.25rem;font-weight:700;color:var(--chalk)}
+.stat span{font-size:.8rem;color:var(--chalk-dim)}
+.target-sub{text-align:center;color:var(--chalk-dim);margin-top:-8px}
+.target-sub:empty{display:none}
+#others text{font-size:7px;font-family:var(--body);fill:var(--chalk-dim)}
+.settings-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.nores{padding:12px;color:var(--chalk-dim)}
 </style>
 </head>
 <body>
@@ -444,11 +576,8 @@ label.check input{width:24px;height:24px;accent-color:var(--amber)}
         <p>Phones only share location with pages whose address starts with <b>https://</b>. Open Class Compass from its https link instead of a saved file.</p>
       </div>
 
-      <div class="stars-stat" id="starStat" hidden>
-        <svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 L25 15 L38 15.6 L28 24 L31.5 37 L20 29.8 L8.5 37 L12 24 L2 15.6 L15 15 Z" fill="#f6d55c" stroke="#2a2610" stroke-width="2" stroke-linejoin="round"/></svg>
-        <span><b id="starCount">0</b> <span id="starWord">stars</span><br><span class="muted small" id="starLevel"></span></span>
-      </div>
-      <p class="greet" id="homeLead"><span id="greet">Hi there!</span> Where are you headed?</p>
+      
+      <p class="greet" id="homeLead"><span id="greet">Hello.</span> Where are you headed?</p>
       <button class="hero" id="nextHero" hidden>
         <span class="hero-top"><span class="pill">Next up</span><span id="heroWhen"></span></span>
         <span class="hero-name" id="heroName"></span>
@@ -457,6 +586,10 @@ label.check input{width:24px;height:24px;accent-color:var(--amber)}
           <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M5 11h12M12 5l6 6-6 6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </span>
       </button>
+      <div class="tools" id="listTools" hidden>
+        <input type="search" id="search" placeholder="Search classes, teachers, notes" aria-label="Search classes" autocomplete="off">
+        <div class="seg" role="group" aria-label="Show classes"><button type="button" data-f="all" aria-pressed="true">All</button><button type="button" data-f="today" aria-pressed="false">Today</button></div>
+      </div>
       <h3 class="section-label" id="allLabel" hidden>All my classes</h3>
       <ul class="list" id="classList"></ul>
       <h3 class="section-label" id="connLabel" hidden>Stairs and elevators</h3>
@@ -469,14 +602,14 @@ label.check input{width:24px;height:24px;accent-color:var(--amber)}
           <li>Tap <b>Add a class</b> and type its name, like "Room 12 Math".</li>
           <li>Tap <b>Save this spot</b> and hold still for a few seconds.</li>
         </ol>
-        <p class="muted small">Do this once for each class. A grown-up can also set them up and send you a link.</p>
+        <p class="muted small">Do this once for each class. You can also import classes from a share link or a backup file in Settings.</p>
       </div>
 
       <button class="btn primary wide" id="addBtn">
         <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 3v16M3 11h16" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
         Add a class
       </button>
-      <button class="btn ghost wide" id="demoBtn">Try a practice walk</button>
+      <button class="btn ghost wide" id="demoBtn">Try a demo walk</button>
     </div>
   </section>
 
@@ -486,13 +619,14 @@ label.check input{width:24px;height:24px;accent-color:var(--amber)}
       <button class="iconbtn" id="backBtn" aria-label="Back to my classes">
         <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4 L7 12 L15 20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <span class="chip" id="demoChip" hidden>Practice walk</span>
+      <span class="chip" id="demoChip" hidden>Demo</span>
       <button class="iconbtn" id="soundBtn" aria-label="Turn spoken directions on" aria-pressed="false">
         <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path id="soundWaves" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".35"/></svg>
       </button>
     </div>
 
     <h2 class="target-name" id="targetName">Room</h2>
+    <p class="target-sub" id="targetSub"></p>
     <div class="floorbar" id="floorBar" hidden>
       <span>You: <b id="fbYou">?</b></span><span aria-hidden="true">&rarr;</span><span>Room: <b id="fbRoom"></b></span>
       <button type="button" class="btn sm" id="fbChange">Change</button>
@@ -506,8 +640,8 @@ label.check input{width:24px;height:24px;accent-color:var(--amber)}
 
     <div id="startBox" class="banner">
       <h3>Ready to go?</h3>
-      <p class="muted">Tap start, then say <b>Allow</b> when your phone asks about location and motion.</p>
-      <button class="btn primary wide" id="startBtn">Start the compass</button>
+      <p class="muted">Tap start, then choose <b>Allow</b> when your phone asks about location and motion.</p>
+      <button class="btn primary wide" id="startBtn">Start navigation</button>
     </div>
 
     <div class="dial" id="dial">
@@ -527,6 +661,7 @@ label.check input{width:24px;height:24px;accent-color:var(--amber)}
         <path d="M100 14 V186 M14 100 H186" stroke="#ffb000" stroke-opacity=".08" stroke-width="1"/>
         <g id="rose" style="transform-origin:100px 100px">
           <g id="ticks"></g>
+          <g id="others"></g>
           <g id="tmark"><rect x="94" y="11" width="12" height="12" fill="#ffb000" stroke="#050505" stroke-width="2" transform="rotate(45 100 17)"/></g>
           <text x="100" y="41" text-anchor="middle" font-family="VT323,monospace" font-size="22" fill="#ff4d3d">N</text>
           <text x="100" y="170" text-anchor="middle" font-family="VT323,monospace" font-size="17" fill="#ffb000" fill-opacity=".7">S</text>
@@ -541,13 +676,9 @@ label.check input{width:24px;height:24px;accent-color:var(--amber)}
             <circle cx="100" cy="100" r="7" fill="#2a2610"/><circle cx="100" cy="100" r="3" fill="#f3f1e7"/>
           </g>
           <g class="skin" data-skin="rocket" hidden>
-            <path class="flame" d="M90 122 L100 152 L110 122 Z" fill="#ffb36b"/>
-            <path d="M84 98 L66 128 L86 120 Z M116 98 L134 128 L114 120 Z" fill="#ff8a80" stroke="#2a2610" stroke-width="2.5" stroke-linejoin="round"/>
-            <path class="n-light" d="M100 30 C117 48 121 82 116 122 L84 122 C79 82 83 48 100 30 Z"/>
-            <path class="n-dark" d="M100 30 C117 48 121 82 116 122 L100 122 Z"/>
-            <path d="M100 30 C117 48 121 82 116 122 L84 122 C79 82 83 48 100 30 Z" fill="none" stroke="#2a2610" stroke-width="2.5" stroke-linejoin="round"/>
-            <circle cx="100" cy="72" r="10" fill="#8fc7ff" stroke="#2a2610" stroke-width="2.5"/>
-            <circle cx="97" cy="69" r="3" fill="#f3f1e7"/>
+            <path class="n-light" d="M100 30 L100 112 L62 136 Z"/>
+            <path class="n-dark" d="M100 30 L138 136 L100 112 Z"/>
+            <path d="M100 30 L138 136 L100 112 L62 136 Z" fill="none" stroke="#2a2610" stroke-width="2.5" stroke-linejoin="miter"/>
           </g>
           <g class="skin" data-skin="plane" hidden>
             <path class="n-light" d="M100 28 L60 140 L100 116 Z"/>
@@ -561,7 +692,8 @@ label.check input{width:24px;height:24px;accent-color:var(--amber)}
           <path d="M60 144 L100 104 L140 144" fill="none" stroke="#ffb000" stroke-width="12" stroke-linecap="square" opacity=".55"/>
         </g>
         <g id="star" hidden>
-          <path d="M100 42 L115 82 L158 84 L124 110 L136 152 L100 128 L64 152 L76 110 L42 84 L85 82 Z" fill="#39ff7a" fill-opacity=".18" stroke="#39ff7a" stroke-width="3" stroke-linejoin="miter"/>
+          <circle cx="100" cy="100" r="44" fill="#39ff7a" fill-opacity=".14" stroke="#39ff7a" stroke-width="3"/>
+          <path d="M78 101 L94 117 L124 85" fill="none" stroke="#39ff7a" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
         </g>
       </svg>
     </div>
@@ -605,10 +737,10 @@ label.check input{width:24px;height:24px;accent-color:var(--amber)}
       <div class="row">
         <button class="btn" id="demoStep">Take 5 steps forward</button>
       </div>
-      <p class="muted small">Point the arrow straight up, then walk. On a real phone you just turn and walk.</p>
+      <p class="muted small">Point the arrow straight up, then walk. On a real phone, just turn and walk.</p>
     </div>
 
-    <p class="muted small" style="text-align:center">GPS inside a school can be off by 5 to 20 meters. When you get close, look for the room sign and read the notes.</p>
+    <p class="muted small" style="text-align:center">GPS indoors can be off by 5 to 20 meters. Step counting fills the gaps; when you get close, look for the room sign and check the notes.</p>
   </section>
 
   <!-- EDIT -->
@@ -633,6 +765,10 @@ label.check input{width:24px;height:24px;accent-color:var(--amber)}
       <label for="fName"><span id="nameLabel">Class name</span>
         <span class="hint" id="nameHint">Like "Room 12 Math" or "Gym"</span>
         <input type="text" id="fName" maxlength="40" autocomplete="off" required>
+      </label>
+
+      <label for="fTeacher" id="teacherWrap">Teacher <span class="hint">Optional</span>
+        <input type="text" id="fTeacher" maxlength="40" autocomplete="off">
       </label>
 
       <div class="spot">
@@ -691,12 +827,12 @@ label.check input{width:24px;height:24px;accent-color:var(--amber)}
       <button class="iconbtn" id="menuBack" aria-label="Back">
         <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4 L7 12 L15 20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <h2 id="menuTitle" style="flex:1">Share and settings</h2>
+      <h2 id="menuTitle" style="flex:1">Settings</h2>
     </div>
 
     <div class="spot">
       <h3>Share my classes</h3>
-      <p class="muted">Send this link to another phone. Opening it adds the same classes there. Great for a teacher or parent setting things up.</p>
+      <p class="muted">Send this link to another phone. Opening it adds the same classes there.</p>
       <textarea class="sharebox" id="shareLink" readonly aria-label="Share link"></textarea>
       <div class="row">
         <button class="btn primary" id="copyLink">Copy link</button>
@@ -710,8 +846,50 @@ label.check input{width:24px;height:24px;accent-color:var(--amber)}
     </div>
 
     <div class="spot">
-      <h3>Pick your arrow</h3>
+      <h3>Your stats</h3>
+      <div class="statgrid">
+        <div class="stat"><b id="stTrips">0</b><span>Trips finished</span></div>
+        <div class="stat"><b id="stDist">0</b><span>Distance guided</span></div>
+        <div class="stat"><b id="stTop">-</b><span>Most visited</span></div>
+        <div class="stat"><b id="stClasses">0</b><span>Saved places</span></div>
+      </div>
+    </div>
+
+    <div class="spot">
+      <h3>Appearance</h3>
+      <div class="settings-row"><span>Style</span>
+        <div class="seg" id="lookPick" role="group" aria-label="Style"><button type="button" data-v="pro">Modern</button><button type="button" data-v="retro">Retro</button></div>
+      </div>
+      <div id="accentWrap" style="display:flex;flex-direction:column;gap:8px"><span>Accent color</span><div class="accents" id="accentPick"></div></div>
+      <span>Arrow</span>
       <div class="skins" id="skinPick" role="radiogroup" aria-label="Arrow style"></div>
+    </div>
+
+    <div class="spot">
+      <h3>Navigation</h3>
+      <div class="settings-row"><span>Units</span>
+        <div class="seg" id="unitPick" role="group" aria-label="Units"><button type="button" data-v="m">Meters</button><button type="button" data-v="ft">Feet</button></div>
+      </div>
+      <label class="check" for="useOthers"><input type="checkbox" id="useOthers"> Show other saved places on the dial</label>
+      <label class="check" for="useHaptics"><input type="checkbox" id="useHaptics"> Vibrate when on course and on arrival</label>
+    </div>
+
+    <div class="spot">
+      <h3>Class reminders</h3>
+      <p class="muted small">Get a notification before a class with a start time. Works while Class Compass is open on your phone (phones may pause it when the screen is off).</p>
+      <select id="remindPick" aria-label="Reminder time">
+        <option value="0">Off</option><option value="5">5 minutes before</option><option value="10">10 minutes before</option><option value="15">15 minutes before</option>
+      </select>
+    </div>
+
+    <div class="spot">
+      <h3>Backup</h3>
+      <p class="muted small">Save all your classes to a file, or restore them on a new phone.</p>
+      <div class="row">
+        <button class="btn" id="exportBtn">Export file</button>
+        <button class="btn" id="importFileBtn">Import file</button>
+      </div>
+      <input type="file" id="importFile" accept=".json,application/json" hidden>
     </div>
 
     <div class="spot">
@@ -735,10 +913,10 @@ label.check input{width:24px;height:24px;accent-color:var(--amber)}
     <div class="spot">
       <h3>Tips for a good arrow</h3>
       <ul style="margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px">
-        <li>Hold the phone flat, like a plate.</li>
+        <li>Hold the phone flat in front of you.</li>
         <li>If the arrow spins or looks wrong, wave the phone in a figure 8 a few times.</li>
-        <li>Stay away from metal lockers and big speakers for a second. They confuse the compass.</li>
-        <li>Save spots near windows or doors. GPS works better there.</li>
+        <li>Metal lockers and speakers can throw the compass off. Step away from them for a moment.</li>
+        <li>Save spots near windows or doors, where GPS works better. Walking outside for a minute lets the app tune the compass and learn your stride.</li>
         <li>On iPhone, tap <b>Share</b> then <b>Add to Home Screen</b> to keep it like an app.</li>
         <li>Lost the arrow? Look for a Class Compass QR poster and scan it with your camera.</li>
         <li>The home-screen app keeps its own list. If you saved classes in Safari first, copy the share link there and paste it under "Add classes from a link" in the home-screen app.</li>
@@ -761,7 +939,6 @@ label.check input{width:24px;height:24px;accent-color:var(--amber)}
   <p class="muted" id="bannedNote"></p>
 </div>
 <div class="toast" id="toast" role="status" hidden></div>
-<canvas class="confetti" id="confetti" hidden></canvas>
 
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
@@ -789,9 +966,12 @@ var classes = load();
 var prefs = { skin: "needle", stars: {}, total: 0 };
 try{ var pr = JSON.parse(localStorage.getItem(KEY + ".prefs") || "null"); if (pr && typeof pr === "object") prefs = Object.assign(prefs, pr); }catch(e){}
 function savePrefs(){ try{ localStorage.setItem(KEY + ".prefs", JSON.stringify(prefs)); }catch(e){} }
-var LEVELS = [[0,"New explorer"],[5,"Hallway scout"],[15,"Map master"],[40,"School legend"],[100,"Compass champion"]];
-function levelFor(n){ var l = LEVELS[0]; LEVELS.forEach(function(x){ if (n >= x[0]) l = x; }); return l; }
-function nextLevel(n){ for (var i = 0; i < LEVELS.length; i++) if (LEVELS[i][0] > n) return LEVELS[i]; return null; }
+/* prefs.stars is kept as the per-place visit count (older versions called them stars). */
+function fmtDist(m){
+  if (prefs.units === "ft"){ var ft = m * 3.28084; return ft >= 1000 ? (m / 1609.34).toFixed(2) + " mi" : Math.round(ft) + " ft"; }
+  return m >= 1000 ? (m / 1000).toFixed(1) + " km" : Math.round(m) + " m";
+}
+function fmtAcc(m){ return "\u00b1" + fmtDist(Math.max(1, m)); }
 var DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 function isConn(c){ return c.kind === "stairs" || c.kind === "elevator"; }
 /* Floors are free text ("2", "G", "B1"). Turn them into numbers when we can, so we know up from down. */
@@ -877,20 +1057,16 @@ function classRow(c, isNext, action){
   if (c.time) meta.push(fmtTime(c.time));
   if (c.floor) meta.push("Floor " + c.floor);
   if (c.days && c.days.length && c.days.length < 7) meta.push(c.days.slice().sort().map(function(d){ return DAYS[d]; }).join(" "));
-  if (prefs.stars[c.id]) meta.push("\u2605 " + prefs.stars[c.id]);
+  if (c.teacher) meta.push(c.teacher);
   return '<li><button class="class' + (isNext ? ' next' : '') + '" data-id="' + esc(c.id) + '" data-act="' + action + '" aria-label="' + esc((action === "go" ? "Go to " : "Edit ") + c.name) + '">' +
-    '<span class="badge' + (isConn(c) ? ' conn' : '') + '" style="background:' + esc(c.color || COLORS[0]) + '">' + esc(c.kind === "stairs" ? "STR" : c.kind === "elevator" ? "ELV" : initials(c.name)) + '</span>' +
+    '<span class="badge' + (isConn(c) ? ' conn' : '') + '" style="background:' + esc(c.color || COLORS[0]) + ';--c:' + esc(c.color || COLORS[0]) + '">' + esc(c.kind === "stairs" ? "STR" : c.kind === "elevator" ? "ELV" : initials(c.name)) + '</span>' +
     '<span class="text">' + (isNext ? '<span class="pill">Next up</span><br>' : '') +
     '<span class="name">' + esc(c.name) + '</span>' + (meta.length ? '<br><span class="meta">' + esc(meta.join(" · ")) + '</span>' : '') + '</span>' +
     (action === "go" ? '<span class="go" aria-hidden="true"></span>' : '<span class="go edit">Edit</span>') + '</button></li>';
 }
 function renderHome(){
   var next = nextClassId(), h = new Date().getHours();
-  $("greet").textContent = h < 12 ? "Good morning!" : h < 17 ? "Good afternoon!" : "Hi there!";
-  $("starStat").hidden = !prefs.total;
-  $("starCount").textContent = prefs.total; $("starWord").textContent = prefs.total === 1 ? "star" : "stars";
-  var nl = nextLevel(prefs.total);
-  $("starLevel").textContent = levelFor(prefs.total)[1] + (nl ? " · " + (nl[0] - prefs.total) + " more to " + nl[1] : "");
+  $("greet").textContent = h < 12 ? "Good morning." : h < 18 ? "Good afternoon." : "Good evening.";
   var nc = classes.find(function(c){ return c.id === next; });
   $("nextHero").hidden = !nc;
   if (nc){
@@ -898,12 +1074,18 @@ function renderHome(){
     var mins = toMin(nc.time) - minutesNow();
     $("heroWhen").textContent = mins > 0 ? "Starts in " + (mins >= 60 ? Math.floor(mins/60) + " h " + (mins % 60) + " min" : mins + " min") : "Starting now";
     $("heroName").textContent = nc.name;
-    $("heroNote").textContent = [nc.floor ? "Floor " + nc.floor : "", nc.notes || ""].filter(Boolean).join(" · ");
+    $("heroNote").textContent = [nc.floor ? "Floor " + nc.floor : "", nc.teacher || "", nc.notes || ""].filter(Boolean).join(" · ");
   }
-  var rest = sortedClasses().filter(function(c){ return c.id !== next && !isConn(c); });
-  var conns = sortedClasses().filter(isConn);
+  var q = $("search").value.trim().toLowerCase();
+  var match = function(c){ return !q || [c.name, c.teacher, c.notes, c.floor && "floor " + c.floor].join(" ").toLowerCase().indexOf(q) >= 0; };
+  var allCls = classes.filter(function(c){ return !isConn(c); });
+  $("listTools").hidden = allCls.length < 4;
+  var rest = sortedClasses().filter(function(c){ return c.id !== next && !isConn(c) && match(c) && (homeFilter !== "today" || onToday(c)); });
+  var conns = sortedClasses().filter(function(c){ return isConn(c) && match(c); });
   $("allLabel").hidden = !(nc && rest.length);
-  $("classList").innerHTML = rest.map(function(c){ return classRow(c, false, "go"); }).join("");
+  $("allLabel").textContent = homeFilter === "today" ? "Today" : "All my classes";
+  $("classList").innerHTML = rest.map(function(c){ return classRow(c, false, "go"); }).join("") +
+    (!rest.length && (q || homeFilter === "today") && allCls.length ? '<li class="nores">' + (q ? "No matches for \u201c" + esc(q) + "\u201d." : "No other classes today.") + '</li>' : "");
   $("connLabel").hidden = !conns.length;
   $("connList").innerHTML = conns.map(function(c){ return classRow(c, false, "go"); }).join("");
   $("emptyState").hidden = classes.length > 0;
@@ -923,6 +1105,14 @@ $("nextHero").addEventListener("click", function(){
   var c = classes.find(function(x){ return x.id === $("nextHero").dataset.id; }); if (c) openCompass(c, false);
 });
 $("menuBtn").addEventListener("click", openMenu);
+var homeFilter = "all";
+$("search").addEventListener("input", renderHome);
+$("listTools").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-f]"); if (!b) return;
+  homeFilter = b.dataset.f;
+  this.querySelectorAll("button[data-f]").forEach(function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+  renderHome();
+});
 $("demoBtn").addEventListener("click", startDemo);
 
 /* ---------- import from shared link ---------- */
@@ -931,8 +1121,19 @@ function b64urlEncode(str){ return btoa(unescape(encodeURIComponent(str))).repla
 function b64urlDecode(s){ s = s.replace(/-/g,"+").replace(/_/g,"/"); while (s.length % 4) s += "="; return decodeURIComponent(escape(atob(s))); }
 function packClasses(){
   return b64urlEncode(JSON.stringify(classes.map(function(c){
-    return [c.name, +c.lat.toFixed(6), +c.lon.toFixed(6), c.notes || "", c.time || "", c.floor || "", c.color || "", (c.days || []).join(""), c.kind || ""];
+    return [c.name, +c.lat.toFixed(6), +c.lon.toFixed(6), c.notes || "", c.time || "", c.floor || "", c.color || "", (c.days || []).join(""), c.kind || "", c.teacher || ""];
   })));
+}
+function showImport(fromBox){
+  if (pendingImport && pendingImport.length){
+    var names = pendingImport.map(function(c){ return c.name; });
+    $("importTitle").textContent = "Add " + pendingImport.length + " " + (pendingImport.length === 1 ? "class" : "classes") + "?";
+    $("importText").textContent = names.slice(0,6).join(", ") + (names.length > 6 ? " and more" : "");
+    $("importBanner").hidden = false;
+    if (fromBox){ renderHome(); show("home"); }
+    return true;
+  }
+  return false;
 }
 function checkImport(src){
   var fromBox = typeof src === "string";
@@ -945,7 +1146,8 @@ function checkImport(src){
                time: /^\d\d:\d\d$/.test(a[4]) ? a[4] : "", floor: String(a[5]||"").slice(0,12),
                color: COLORS.indexOf(a[6]) >= 0 ? a[6] : COLORS[0],
                days: String(a[7] || "").split("").map(Number).filter(function(d){ return d >= 0 && d <= 6; }),
-               kind: a[8] === "stairs" || a[8] === "elevator" ? a[8] : undefined };
+               kind: a[8] === "stairs" || a[8] === "elevator" ? a[8] : undefined,
+               teacher: a[9] ? String(a[9]).slice(0,40) : undefined };
     }).filter(validClass);
   }catch(e){ pendingImport = null; }
   if (pendingImport && pendingImport.length){
@@ -978,6 +1180,7 @@ function openMenu(){
   $("nativeShare").hidden = !(navigator.share && classes.length);
   $("editList").innerHTML = classes.length ? sortedClasses().map(function(c){ return classRow(c, false, "edit"); }).join("") : '<li class="muted">No classes yet.</li>';
   $("wipeConfirm").hidden = true; $("wipeBtn").hidden = !classes.length;
+  renderStats(); renderSettings();
   show("menu");
 }
 $("menuBack").addEventListener("click", function(){ renderHome(); show("home"); });
@@ -1010,14 +1213,14 @@ function setSpotUI(state, text, pct){
   if (pct != null) $("spotBar").style.width = Math.round(pct) + "%";
 }
 function describeSpot(s){
-  return "Spot saved (about ±" + Math.max(1, Math.round(s.acc || 0)) + " m)";
+  return "Spot saved (about " + fmtAcc(s.acc || 0) + ")";
 }
 function curKind(){ var k = document.querySelector('input[name=kind]:checked'); return k ? k.value : "class"; }
 function kindUI(){
   var k = curKind(), cls = k === "class";
   $("nameLabel").textContent = cls ? "Class name" : k === "stairs" ? "Stairs name" : "Elevator name";
   $("nameHint").textContent = cls ? 'Like "Room 12 Math" or "Gym"' : 'Like "Blue stairs" or "Stairs by the gym"';
-  $("timeWrap").hidden = !cls; $("daysWrap").hidden = !cls;
+  $("timeWrap").hidden = !cls; $("daysWrap").hidden = !cls; $("teacherWrap").hidden = !cls;
   $("floorLabel").textContent = cls ? "Floor" : "Floor you saved it on";
   $("spotHelp").textContent = cls ? "Stand at the classroom door, then tap the button. Hold still while it listens." : "Stand at the bottom or top of the " + (k === "stairs" ? "stairs" : "elevator") + ", then tap the button.";
   if (!editing) $("editTitle").textContent = cls ? "Add a class" : k === "stairs" ? "Add stairs" : "Add an elevator";
@@ -1032,6 +1235,7 @@ function openEdit(c){
   $("editTitle").textContent = c ? "Edit class" : "Add a class";
   $("fName").value = c ? c.name : "";
   $("fNotes").value = c ? (c.notes || "") : "";
+  $("fTeacher").value = c ? (c.teacher || "") : "";
   $("fTime").value = c ? (c.time || "") : "";
   $("fFloor").value = c ? (c.floor || "") : "";
   $(c && c.kind === "stairs" ? "kStairs" : c && c.kind === "elevator" ? "kElevator" : "kClass").checked = true; kindUI();
@@ -1075,7 +1279,7 @@ $("spotBtn").addEventListener("click", function(){
   spotWatch = navigator.geolocation.watchPosition(function(p){
     samples.push({ lat: p.coords.latitude, lon: p.coords.longitude, acc: p.coords.accuracy || 50 });
     var el = Date.now() - start, best = Math.min.apply(null, samples.map(function(s){ return s.acc; }));
-    setSpotUI("warn", "Listening… hold still (±" + Math.round(best) + " m)", Math.min(100, el / MAX_MS * 100));
+    setSpotUI("warn", "Listening… hold still (" + fmtAcc(best) + ")", Math.min(100, el / MAX_MS * 100));
     if (el > MIN_MS && best <= 6 && samples.length >= 2) finish();
   }, function(err){
     stopSpot(); $("spotBtn").disabled = false;
@@ -1106,6 +1310,7 @@ $("form").addEventListener("submit", function(e){
   var data = { name: name.slice(0,40), lat: place.lat, lon: place.lon, acc: place.acc || 0,
     notes: $("fNotes").value.trim(), time: curKind() === "class" ? ($("fTime").value || "") : "", floor: $("fFloor").value.trim(),
     kind: curKind() === "class" ? undefined : curKind(),
+    teacher: curKind() === "class" && $("fTeacher").value.trim() ? $("fTeacher").value.trim().slice(0,40) : undefined,
     days: [0,1,2,3,4,5,6].filter(function(d){ return $("day" + d).checked; }),
     color: colorEl ? colorEl.value : COLORS[0] };
   if (editing) Object.assign(editing, data); else classes.push(Object.assign({ id: uid() }, data));
@@ -1121,12 +1326,13 @@ $("delYes").addEventListener("click", function(){
 /* ---------- compass ---------- */
 var leg = "room", via = null, atConn = false, wasOn = false, lastOnAt = 0, tripStart = null, target = null, demo = false, here = null, geoWatch = null;
 var heading = null, headingSrc = null, hx = 0, hy = 0, lastOrientAt = 0, iosAcc = null, tilt = 0;
+var othersAt = 0, tripBegan = null;
 var shownArrow = 0, shownRose = 0, arrivedOnce = false, wakeLock = null, raf = null, started = false;
 var speak = false, lastSpoken = "", lastSpokenAt = 0;
 try{ speak = localStorage.getItem(KEY + ".speak") === "1"; }catch(e){}
 
 function openCompass(c, isDemo){
-  tripStart = null; $("trip").hidden = true; $("dial").classList.remove("ontarget"); $("say").classList.remove("ontarget");
+  tripStart = null; tripBegan = null; $("trip").hidden = true; $("dial").classList.remove("ontarget"); $("say").classList.remove("ontarget");
   wasOn = false; $("distSteps").dataset.star = ""; $("onTime").hidden = true;
   leg = "room"; via = null; atConn = false; stepCount = 0; outliers = 0; lastFixStamp = 0; calFrom = null; gLow = null;
   $("stepChip").hidden = true; $("hdgDeg").textContent = "---"; $("hdgCard").textContent = ""; $("tgtDeg").textContent = "---";
@@ -1134,6 +1340,8 @@ function openCompass(c, isDemo){
   $("climb").setAttribute("hidden", ""); $("dial").classList.remove("climbing");
   target = c; demo = isDemo; here = null; fixAt = 0; walkAt = 0; tipLocked = false; $("arrow").style.opacity = 1; heading = null; headingSrc = null; arrivedOnce = false; started = false;
   $("targetName").textContent = c.name;
+  $("targetSub").textContent = [c.teacher, c.time && fmtTime(c.time), c.floor && (isConn(c) ? "" : "Floor " + c.floor)].filter(Boolean).join(" · ");
+  $("others").innerHTML = ""; othersAt = 0;
   renderFloorBar();
   if (!isDemo && !isConn(c) && c.floor && !prefs.floor) showFloorPick();
   $("notesBody").textContent = c.notes || "";
@@ -1202,7 +1410,7 @@ $("floorDone").addEventListener("click", function(){
   prefs.floor = target.floor; savePrefs(); renderFloorBar();
   leg = "room"; via = null; atConn = "done"; tripStart = null; arrivedOnce = false;
   $("floorDone").hidden = true; $("climb").setAttribute("hidden", ""); $("dial").classList.remove("climbing");
-  chime([659, 784]); say("Now find " + target.name);
+  chime([659, 784]); say("Now head to " + target.name);
 });
 
 /* Android/desktop don't need a tap for motion; iOS does, so it always shows the Start button first. */
@@ -1214,7 +1422,7 @@ $("startBtn").addEventListener("click", function(){ audioOn(); beginNav(true); }
 $("backBtn").addEventListener("click", function(){ renderHome(); show("home"); });
 $("soundBtn").addEventListener("click", function(){
   audioOn(); speak = !speak; try{ localStorage.setItem(KEY + ".speak", speak ? "1" : "0"); }catch(e){}
-  updateSoundBtn(); if (speak) say("Talking directions on"); else if (window.speechSynthesis) speechSynthesis.cancel();
+  updateSoundBtn(); if (speak) say("Spoken directions on"); else if (window.speechSynthesis) speechSynthesis.cancel();
 });
 function updateSoundBtn(){
   $("soundBtn").setAttribute("aria-pressed", speak ? "true" : "false");
@@ -1338,7 +1546,7 @@ function onMotion(e){
   if (armed && aSmooth > 1.1 && now - lastStepAt > 280){ armed = false; onStep(now); }
   else if (!armed && aSmooth < 0.2) armed = true;
 }
-function stride(){ return prefs.stride || 0.6; } // meters; about right for a kid, learned over time
+function stride(){ return prefs.stride || 0.7; } // meters; a typical walking step, learned over time
 function onStep(now){
   lastStepAt = now; stepCount++; calSteps++;
   $("stepChip").hidden = false; $("stepText").textContent = "Steps: " + stepCount;
@@ -1350,7 +1558,7 @@ function onStep(now){
 }
 function pdrActive(){ return Date.now() - motionAt < 3000 && headingSrc === "compass"; }
 
-/* Learn the kid's stride: compare steps with GPS distance over a stretch of good readings. */
+/* Learn the user's stride: compare steps with GPS distance over a stretch of good readings. */
 var calFrom = null, calSteps = 0;
 function learnStride(gps){
   if (gps.acc > 8){ calFrom = null; return; }
@@ -1430,8 +1638,8 @@ function turnWords(rel){
   return "Turn around";
 }
 function stepsText(m){
-  var steps = Math.round(m / 0.6 / 5) * 5; // kid steps are about 0.6 m
-  return steps <= 5 ? "just a few steps" : "about " + steps + " steps";
+  var steps = Math.round(m / stride() / 5) * 5;
+  return steps <= 5 ? "a few steps away" : "about " + steps + " steps";
 }
 
 function loop(){
@@ -1455,7 +1663,7 @@ function tick(){
   if (!here){ return; }
   var acc = here.acc;
   if (!demo && fixAt && now - fixAt > 15000) setChip("gps", "warn", "Location: looking…");
-  else setChip("gps", acc <= 12 ? "good" : acc <= 30 ? "warn" : "bad", "Location: ±" + Math.round(acc) + " m");
+  else setChip("gps", acc <= 12 ? "good" : acc <= 30 ? "warn" : "bad", "Location: " + fmtAcc(acc));
 
   if (atConn !== "done" && !via && !demo && !isConn(target) && target.floor && prefs.floor && !sameFloor(prefs.floor, target.floor)) planRoute();
   var dest = leg === "connector" && via ? via : target;
@@ -1468,7 +1676,7 @@ function tick(){
   $("legLabel").hidden = !routed;
   if (routed) $("legLabel").textContent = leg === "connector" ? (atConn ? "2 of 3: take the " + (via.kind === "elevator" ? "elevator" : "stairs") : "1 of 3: walk to " + via.name) : "3 of 3: walk to " + target.name;
 
-  // At the stairs: show the up/down step and wait for the kid to say they've changed floor.
+  // At the stairs: show the up/down step and wait for the user to confirm the floor change.
   if (leg === "connector" && via && (atConn || d <= arriveR)){
     if (!atConn){ atConn = true; chime([523, 784]); buzz([80, 60, 80]); say(climbWord()); }
     var up = floorNum(target.floor) == null || floorNum(prefs.floor) == null || floorNum(target.floor) >= floorNum(prefs.floor);
@@ -1484,18 +1692,19 @@ function tick(){
 
   if (d <= arriveR){
     if (!arrivedOnce){
-      arrivedOnce = true; if (target.floor && !isConn(target) && !demo){ prefs.floor = target.floor; savePrefs(); renderFloorBar(); } celebrate(); chime([523, 659, 784, 1047]); say("You made it to " + target.name + "!");
+      arrivedOnce = true; if (target.floor && !isConn(target) && !demo){ prefs.floor = target.floor; savePrefs(); renderFloorBar(); } celebrate(); chime([523, 659, 784, 1047]); say("You have arrived at " + target.name);
       if (!demo){
-        var before = levelFor(prefs.total)[1];
         track("arrive");
-        prefs.total = (prefs.total || 0) + 1; prefs.stars[target.id] = (prefs.stars[target.id] || 0) + 1; savePrefs();
-        var after = levelFor(prefs.total)[1];
-        $("distSteps").dataset.star = after !== before ? "New level: " + after + "!" : "+1 star! You have " + prefs.total + ".";
-      } else $("distSteps").dataset.star = "Practice done! Now try a real class.";
+        prefs.total = (prefs.total || 0) + 1; prefs.stars[target.id] = (prefs.stars[target.id] || 0) + 1;
+        if (tripStart) prefs.walked = (prefs.walked || 0) + tripStart;
+        savePrefs();
+        var secs = tripBegan ? Math.round((Date.now() - tripBegan) / 1000) : 0;
+        $("distSteps").dataset.star = secs > 20 ? "Trip time " + Math.floor(secs / 60) + ":" + ("0" + secs % 60).slice(-2) : "Arrived";
+      } else $("distSteps").dataset.star = "Demo finished. Try it with a real class.";
     }
     $("dial").classList.add("arrived"); $("dial").classList.remove("ontarget"); $("arrow").setAttribute("hidden",""); $("trip").hidden = true; $("star").removeAttribute("hidden");
-    setSay("You're here! Look for the room sign.", true);
-    $("distBig").textContent = Math.round(d) + " m"; $("distSteps").textContent = $("distSteps").dataset.star || "right around here";
+    setSay("You've arrived. Look for the room sign.", true);
+    $("distBig").textContent = fmtDist(d); $("distSteps").textContent = $("distSteps").dataset.star || "right around here";
     $("onTime").hidden = true;
     shownRose = rotate($("rose"), shownRose, heading == null ? 0 : -heading);
     return;
@@ -1503,11 +1712,12 @@ function tick(){
   if (arrivedOnce && d > arriveR + 8) arrivedOnce = false;
   $("dial").classList.remove("arrived"); $("star").setAttribute("hidden",""); $("arrow").removeAttribute("hidden");
 
-  if (tripStart == null || d > tripStart) tripStart = Math.max(d, arriveR + 1);
+  if (tripStart == null || d > tripStart){ tripStart = Math.max(d, arriveR + 1); tripBegan = tripBegan || now; }
+  if (prefs.others !== false && now - othersAt > 1000){ othersAt = now; drawOthers(); }
   var prog = Math.max(0, Math.min(1, (tripStart - d) / (tripStart - arriveR)));
   $("trip").hidden = tripStart < arriveR + 10;
   $("tripFill").style.width = (prog * 100).toFixed(1) + "%"; $("tripDot").style.left = (prog * 100).toFixed(1) + "%";
-  $("tripText").textContent = prog < 0.05 ? "Let's go!" : prog < 0.5 ? Math.round(prog * 100) + "% of the way" : prog < 0.85 ? "More than halfway! " + Math.round(prog * 100) + "%" : "Almost there!";
+  $("tripText").textContent = prog < 0.05 ? "Trip started" : prog < 0.9 ? Math.round(prog * 100) + "% of the way" : "Almost there";
   var dTotal = d + (dest !== target ? distanceM(dest, target) + 25 : 0); // about 25 m extra for a flight of stairs
   $("tmark").style.transform = "rotate(" + b + "deg)"; $("tmark").style.transformOrigin = "100px 100px";
   var ot = $("onTime"), tm = toMin(target.time);
@@ -1515,11 +1725,11 @@ function tick(){
     var walk = Math.max(1, Math.ceil(dTotal / 1.1 / 60)), left = tm - minutesNow();
     ot.hidden = left < -15;
     ot.className = "ontime " + (left - walk >= 2 ? "good" : left - walk >= 0 ? "warn" : "bad");
-    ot.textContent = left - walk >= 2 ? "You'll make it! " + walk + " min walk, class in " + left + " min"
-      : left >= 0 ? "Hurry! Class starts in " + left + " min" : "Class already started. Go straight there!";
+    ot.textContent = left - walk >= 2 ? "On time: " + walk + " min walk, class in " + left + " min"
+      : left >= 0 ? "Tight: class starts in " + left + " min" : "Class has started";
   } else ot.hidden = true;
-  $("distBig").textContent = d >= 1000 ? (d/1000).toFixed(1) + " km" : Math.round(d) + " m";
-  $("distSteps").textContent = d > 400 ? "that's far, check you picked the right school spot" : stepsText(d);
+  $("distBig").textContent = fmtDist(d);
+  $("distSteps").textContent = d > 400 ? "that's far, check this is the right place" : stepsText(d);
 
   var words;
   if (heading != null){
@@ -1540,12 +1750,12 @@ function tick(){
     $("dial").classList.add("nocompass"); $("dial").classList.remove("ontarget"); $("say").classList.remove("ontarget");
     words = "Head " + cardinal(b) + ". Start walking and the arrow will follow you.";
   }
-  if (acc > d * 1.5 && d < 40) words = "You're close! Look around for the sign.";
+  if (acc > d * 1.5 && d < 40) words = "You're close. Look for the room sign.";
   setSay(words);
 
   var tip = null;
-  if (headingSrc === "compass" && tilt > 55) tip = "Hold the phone flat, like a plate, so the arrow stays steady.";
-  else if (acc > 30) tip = "GPS is fuzzy right now (±" + Math.round(acc) + " m). Move toward a window or doorway, or use the notes below.";
+  if (headingSrc === "compass" && tilt > 55) tip = "Hold the phone flatter so the arrow stays steady.";
+  else if (acc > 30) tip = "GPS is weak right now (" + fmtAcc(acc) + "). Move toward a window or doorway, or use the notes below.";
   if (tip) showTip(tip); else if (!tipLocked) $("tipBox").hidden = true;
 
   if (speak && now - lastSpokenAt > 6000 && (words !== lastSpoken || now - lastSpokenAt > 15000)){
@@ -1553,27 +1763,15 @@ function tick(){
   }
 }
 
-/* ---------- celebration ---------- */
-function celebrate(){
-  if (navigator.vibrate) try{ navigator.vibrate([120,60,120,60,240]); }catch(e){}
-  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  var cv = $("confetti"), ctx = cv.getContext("2d"); cv.hidden = false;
-  cv.width = innerWidth; cv.height = innerHeight;
-  var bits = []; for (var i = 0; i < 90; i++) bits.push({ x: Math.random()*cv.width, y: -20 - Math.random()*cv.height*0.5, vx: (Math.random()-.5)*3, vy: 2+Math.random()*4, r: Math.random()*6.28, c: ["#ffb000","#39ff7a","#ffd27a","#ff4d3d"][i % 4] });
-  var t0 = Date.now();
-  (function frame(){
-    ctx.clearRect(0,0,cv.width,cv.height);
-    bits.forEach(function(b){ b.x += b.vx; b.y += b.vy; b.r += .1; ctx.save(); ctx.translate(b.x,b.y); ctx.rotate(b.r); ctx.fillStyle = b.c; ctx.fillRect(-3,-3,6,6); ctx.restore(); });
-    if (Date.now() - t0 < 2600) requestAnimationFrame(frame); else { cv.hidden = true; }
-  })();
-}
+/* ---------- arrival ---------- */
+function celebrate(){ buzz([120, 60, 120, 60, 240]); }
 
 /* ---------- practice walk (works on any device) ---------- */
 var demoHeading = 0;
 function startDemo(){
   var origin = { lat: 40.000000, lon: -75.000000 };
   var room = offsetPoint(origin, 30, 60);
-  openCompass({ id: "demo", name: "Practice: Room 12", lat: room.lat, lon: room.lon, notes: "Down the main hall, past the library. Room 12 is the blue door on the right." }, true);
+  openCompass({ id: "demo", name: "Demo: Room 12", lat: room.lat, lon: room.lon, notes: "Down the main hall, past the library. Room 12 is the blue door on the right." }, true);
   here = { lat: origin.lat, lon: origin.lon, acc: 5 };
 }
 function beginDemo(){
@@ -1587,7 +1785,7 @@ $("demoStep").addEventListener("click", function(){
 });
 
 /* ---------- arrow skins ---------- */
-var SKINS = [["needle","Needle"],["rocket","Rocket"],["plane","Paper plane"]];
+var SKINS = [["needle","Classic"],["rocket","Chevron"],["plane","Delta"]];
 function applySkin(){
   document.querySelectorAll("#arrow .skin").forEach(function(g){
     if (g.getAttribute("data-skin") === prefs.skin) g.removeAttribute("hidden"); else g.setAttribute("hidden", "");
@@ -1600,11 +1798,128 @@ $("skinPick").innerHTML = SKINS.map(function(k){
 }).join("");
 $("skinPick").addEventListener("click", function(e){
   var b = e.target.closest(".skin-btn"); if (!b) return;
-  prefs.skin = b.dataset.skin; savePrefs(); applySkin(); toast(b.textContent + " picked");
+  prefs.skin = b.dataset.skin; savePrefs(); applySkin(); toast(b.textContent + " arrow");
 });
 applySkin();
 $("useElev").checked = !!prefs.elevator;
 $("useElev").addEventListener("change", function(){ prefs.elevator = this.checked; savePrefs(); toast(this.checked ? "Elevators first" : "Stairs first"); });
+
+
+/* ---------- v8: other saved places on the dial ---------- */
+function drawOthers(){
+  var g = $("others"); if (!here || demo){ g.innerHTML = ""; return; }
+  var dest = leg === "connector" && via ? via : target, out = "", R = 200, labels = [];
+  classes.filter(function(c){ return c.id !== dest.id && c.id !== target.id && (isConn(c) || sameFloor(prefs.floor, c.floor)); })
+    .map(function(c){ return { c: c, d: distanceM(here, c) }; })
+    .filter(function(o){ return o.d <= R; })
+    .sort(function(a, b){ return a.d - b.d; }).slice(0, 8)
+    .forEach(function(o){
+      var a = toRad(bearingDeg(here, o.c)), r = 16 + 46 * Math.sqrt(o.d / R);
+      var x = 100 + r * Math.sin(a), y = 100 - r * Math.cos(a);
+      out += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="3.2" fill="' + esc(o.c.color || COLORS[0]) + '"><title>' + esc(o.c.name) + '</title></circle>';
+      // Label only when it won't overlap a closer place's label.
+      if (labels.every(function(l){ return Math.abs(l[0] - x) > 12 || Math.abs(l[1] - y) > 9; })){
+        labels.push([x, y]);
+        out += '<text x="' + x.toFixed(1) + '" y="' + (y + 10).toFixed(1) + '" text-anchor="middle">' + esc(o.c.kind ? (o.c.kind === "stairs" ? "STR" : "ELV") : initials(o.c.name)) + '</text>';
+      }
+    });
+  g.innerHTML = out;
+}
+
+/* ---------- v8: settings ---------- */
+var ACCENTS = [["blue","#3b82f6"],["teal","#2dd4bf"],["amber","#fbbf24"],["violet","#8b5cf6"],["rose","#fb7185"]];
+$("accentPick").innerHTML = ACCENTS.map(function(a){ return '<button type="button" data-v="' + a[0] + '" style="--sw:' + a[1] + '" aria-label="' + a[0] + '"></button>'; }).join("");
+function applyLook(){
+  var root = document.documentElement;
+  root.className = prefs.look === "retro" ? "retro" : "pro";
+  if (prefs.accent) root.dataset.accent = prefs.accent; else delete root.dataset.accent;
+  var m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = prefs.look === "retro" ? "#050505" : "#0b0d10";
+}
+function pressed(id, v){ $(id).querySelectorAll("button[data-v]").forEach(function(b){ b.setAttribute("aria-pressed", b.dataset.v === v ? "true" : "false"); }); }
+function renderSettings(){
+  pressed("lookPick", prefs.look === "retro" ? "retro" : "pro");
+  pressed("accentPick", prefs.accent || "blue");
+  $("accentWrap").hidden = prefs.look === "retro";
+  pressed("unitPick", prefs.units === "ft" ? "ft" : "m");
+  $("useOthers").checked = prefs.others !== false;
+  $("useHaptics").checked = prefs.haptics !== false;
+  $("remindPick").value = String(prefs.remind || 0);
+}
+function renderStats(){
+  $("stTrips").textContent = prefs.total || 0;
+  $("stDist").textContent = fmtDist(prefs.walked || 0);
+  var top = null, n = 0;
+  Object.keys(prefs.stars || {}).forEach(function(id){ var c = classes.find(function(x){ return x.id === id; }); if (c && prefs.stars[id] > n){ n = prefs.stars[id]; top = c; } });
+  $("stTop").textContent = top ? top.name : "-";
+  $("stClasses").textContent = classes.length;
+}
+$("lookPick").addEventListener("click", function(e){ var b = e.target.closest("button[data-v]"); if (!b) return; prefs.look = b.dataset.v; savePrefs(); applyLook(); renderSettings(); });
+$("accentPick").addEventListener("click", function(e){ var b = e.target.closest("button[data-v]"); if (!b) return; prefs.accent = b.dataset.v === "blue" ? undefined : b.dataset.v; savePrefs(); applyLook(); renderSettings(); });
+$("unitPick").addEventListener("click", function(e){ var b = e.target.closest("button[data-v]"); if (!b) return; prefs.units = b.dataset.v; savePrefs(); renderSettings(); renderStats(); });
+$("useOthers").addEventListener("change", function(){ prefs.others = this.checked; savePrefs(); if (!this.checked) $("others").innerHTML = ""; });
+$("useHaptics").addEventListener("change", function(){ prefs.haptics = this.checked; savePrefs(); if (this.checked) buzz(40); });
+applyLook();
+
+/* ---------- v8: reminders ---------- */
+$("remindPick").addEventListener("change", function(){
+  var v = +this.value; prefs.remind = v; savePrefs();
+  if (!v) { toast("Reminders off"); return; }
+  if (!("Notification" in window)){ toast("This browser can't show notifications. You'll get an in-app alert instead."); return; }
+  Notification.requestPermission().then(function(r){
+    toast(r === "granted" ? "Reminders on, " + v + " min before class" : "Notifications blocked. You'll get an in-app alert instead.");
+  });
+});
+var reminded = {};
+function checkReminders(){
+  var lead = prefs.remind; if (!lead) return;
+  var now = minutesNow(), day = new Date().toDateString();
+  classes.forEach(function(c){
+    var tm = toMin(c.time); if (isConn(c) || tm == null || !onToday(c)) return;
+    var key = c.id + day;
+    if (reminded[key] || now < tm - lead || now >= tm) return;
+    reminded[key] = 1;
+    var body = c.name + " starts at " + fmtTime(c.time) + (c.floor ? " on floor " + c.floor : "") + ".";
+    toast(body); buzz([80, 60, 80]);
+    if (window.Notification && Notification.permission === "granted"){
+      var opts = { body: body, tag: "cc-" + c.id, icon: "icon-192.png", data: { url: location.pathname } };
+      if (navigator.serviceWorker && navigator.serviceWorker.ready && location.protocol === "https:")
+        navigator.serviceWorker.ready.then(function(r){ r.showNotification("Class Compass", opts); }).catch(function(){ try{ new Notification("Class Compass", opts); }catch(e){} });
+      else try{ new Notification("Class Compass", opts); }catch(e){}
+    }
+  });
+}
+setInterval(checkReminders, 30000); setTimeout(checkReminders, 2000);
+
+/* ---------- v8: backup file ---------- */
+$("exportBtn").addEventListener("click", function(){
+  if (!classes.length){ toast("Nothing to export yet"); return; }
+  var data = { app: "class-compass", version: 1, exported: new Date().toISOString(), classes: classes };
+  var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  var a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = "class-compass-backup-" + new Date().toISOString().slice(0, 10) + ".json";
+  document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  toast("Backup saved");
+});
+$("importFileBtn").addEventListener("click", function(){ $("importFile").value = ""; $("importFile").click(); });
+$("importFile").addEventListener("change", function(){
+  var f = this.files && this.files[0]; if (!f) return;
+  var rd = new FileReader();
+  rd.onload = function(){
+    try{
+      var d = JSON.parse(rd.result), arr = Array.isArray(d) ? d : d && d.classes;
+      pendingImport = (arr || []).filter(validClass).map(function(c){
+        return { id: uid(), name: String(c.name).slice(0,40), lat: +c.lat, lon: +c.lon, acc: +c.acc || 0, notes: String(c.notes || "").slice(0,300),
+          time: /^\d\d:\d\d$/.test(c.time) ? c.time : "", floor: String(c.floor || "").slice(0,12),
+          color: COLORS.indexOf(c.color) >= 0 ? c.color : COLORS[0],
+          days: Array.isArray(c.days) ? c.days.map(Number).filter(function(x){ return x >= 0 && x <= 6; }) : [],
+          kind: c.kind === "stairs" || c.kind === "elevator" ? c.kind : undefined,
+          teacher: c.teacher ? String(c.teacher).slice(0,40) : undefined };
+      });
+    }catch(e){ pendingImport = null; }
+    if (!showImport(true)) toast("That file isn't a Class Compass backup.");
+  };
+  rd.readAsText(f);
+});
 
 /* ---------- sounds ---------- */
 var actx = null;
@@ -1620,7 +1935,7 @@ function chime(notes){
     o.connect(g); g.connect(actx.destination); o.start(t + i * 0.11); o.stop(t + i * 0.11 + 0.4);
   });
 }
-function buzz(p){ if (navigator.vibrate) try{ navigator.vibrate(p); }catch(e){} }
+function buzz(p){ if (prefs.haptics !== false && navigator.vibrate) try{ navigator.vibrate(p); }catch(e){} }
 
 /* ---------- dial ticks ---------- */
 (function(){

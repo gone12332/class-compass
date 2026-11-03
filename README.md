@@ -1,6 +1,6 @@
 # Class Compass
 
-A phone web app that points kids to their next classroom with a big arrow, the distance in steps, and written directions. Retro amber-terminal look.
+A phone web app that points students to their next classroom with a compass arrow, the distance in steps, and written directions. Modern dark look, with an optional retro terminal style.
 
 - **App:** https://gone12332.github.io/class-compass/
 - **Admin:** https://gone12332.github.io/class-compass/admin/ (needs the Supabase setup below)
