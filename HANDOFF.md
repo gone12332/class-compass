@@ -24,6 +24,7 @@ A static web app for kids who have trouble finding classrooms. A kid saves each 
 - Stats: `track(kind, src)` POSTs to Supabase `rpc/cc_track`. If the reply says `banned`, the app shows the "Access paused" screen.
 - Admin (`admin/index.html`): logs in through Supabase Auth (`root` becomes `root@example.com`), then calls `cc_admin_stats`, `cc_admin_devices` and `cc_admin_ban`. All three check `cc_is_admin()` in SQL, so they're useless without the admin login.
 - Floors: GPS can't tell floors, so the app remembers the floor you're on (asked once, then set on every arrival or when you tap "I'm on floor X now"). If the room is on another floor, `planRoute()` picks the stairs/elevator spot that makes here -> stairs -> room shortest, and the trip runs in 3 steps: walk to stairs, go up/down (button confirms), walk to room. `floorNum()` reads floors like 2, G, B1.
+- Tracking: GPS is fused with a Kalman-style filter (`onPos`). Between GPS fixes the phone counts steps from `devicemotion` (`onMotion`/`onStep`) and moves the position one stride along the compass heading (pedestrian dead reckoning), which helps indoors. GPS jumps over 3 sigma are ignored while steps are being counted (unless 3 in a row). Stride length is learned from GPS (`learnStride`, saved as `prefs.stride`), and the magnetic-to-true-north offset is learned from GPS walking direction (`learnOffset`, saved as `prefs.hdgOffset`). The compass screen shows HDG (your heading) and TGT (bearing to the room).
 - QR codes use `qrcode-generator@1.4.4` from jsDelivr.
 
 ## Testing

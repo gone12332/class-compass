@@ -385,6 +385,10 @@ legend{color:var(--amber);font-family:var(--body);text-transform:uppercase;font-
 input[type=range]{accent-color:var(--amber)}
 @media (prefers-reduced-motion:reduce){.greet::after,.hero-go::after{animation:none}}
 
+/* ---------- v7: heading readout ---------- */
+.hdg{display:flex;justify-content:center;gap:22px;font-size:.8rem;letter-spacing:.1em;color:var(--chalk-dim);text-transform:uppercase}
+.hdg b{font-family:var(--display);font-weight:400;font-size:1.5rem;color:var(--amber);text-shadow:0 0 6px rgba(255,176,0,.5);font-variant-numeric:tabular-nums}
+
 /* ---------- v6: floors ---------- */
 .floorbar{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font-size:.9rem;text-transform:uppercase;letter-spacing:.05em;color:var(--chalk-dim)}
 .floorbar b{font-family:var(--display);font-weight:400;font-size:1.6rem;color:var(--amber)}
@@ -578,6 +582,11 @@ label.check input{width:24px;height:24px;accent-color:var(--amber)}
     <div class="status">
       <span class="chip"><span class="dot" id="gpsDot"></span><span id="gpsText">Location: waiting</span></span>
       <span class="chip"><span class="dot" id="cmpDot"></span><span id="cmpText">Compass: waiting</span></span>
+      <span class="chip" id="stepChip" hidden><span class="dot good"></span><span id="stepText">Steps: 0</span></span>
+    </div>
+    <div class="hdg" aria-live="off">
+      <span>HDG <b id="hdgDeg">---</b>&deg; <b id="hdgCard"></b></span>
+      <span>TGT <b id="tgtDeg">---</b>&deg;</span>
     </div>
 
     <div id="tipBox" class="banner warn" hidden>
@@ -1119,7 +1128,8 @@ try{ speak = localStorage.getItem(KEY + ".speak") === "1"; }catch(e){}
 function openCompass(c, isDemo){
   tripStart = null; $("trip").hidden = true; $("dial").classList.remove("ontarget"); $("say").classList.remove("ontarget");
   wasOn = false; $("distSteps").dataset.star = ""; $("onTime").hidden = true;
-  leg = "room"; via = null; atConn = false;
+  leg = "room"; via = null; atConn = false; stepCount = 0; outliers = 0; lastFixStamp = 0; calFrom = null; gLow = null;
+  $("stepChip").hidden = true; $("hdgDeg").textContent = "---"; $("hdgCard").textContent = ""; $("tgtDeg").textContent = "---";
   $("floorDone").hidden = true; $("legLabel").hidden = true; $("floorNote").hidden = true; $("floorPick").hidden = true;
   $("climb").setAttribute("hidden", ""); $("dial").classList.remove("climbing");
   target = c; demo = isDemo; here = null; fixAt = 0; walkAt = 0; tipLocked = false; $("arrow").style.opacity = 1; heading = null; headingSrc = null; arrivedOnce = false; started = false;
@@ -1230,11 +1240,16 @@ function beginNav(fromTap){
       DeviceOrientationEvent.requestPermission().then(function(r){ if (r !== "granted") compassDenied = true; })
         .catch(function(){ compassDenied = true; });
     }
+    // Step counting uses the motion sensor; iPhone asks for it in the same tap.
+    if (fromTap && window.DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === "function"){
+      DeviceMotionEvent.requestPermission().catch(function(){});
+    }
     listenOrientation();
+    window.addEventListener("devicemotion", onMotion, true);
   } else noCompass("Compass: not on this phone");
   // Location
   if (!navigator.geolocation){ setChip("gps","bad","Location: not on this phone"); setSay("This phone can't share location"); return; }
-  geoWatch = navigator.geolocation.watchPosition(onPos, onPosErr, { enableHighAccuracy: true, maximumAge: 1000, timeout: 30000 });
+  geoWatch = navigator.geolocation.watchPosition(onPos, onPosErr, { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 });
   setSay("Finding you…");
   loop();
   // If no orientation events arrive, the phone has no usable compass.
@@ -1245,6 +1260,7 @@ function stopNav(){
   if (geoWatch != null && navigator.geolocation){ navigator.geolocation.clearWatch(geoWatch); geoWatch = null; }
   window.removeEventListener("deviceorientationabsolute", onAbs, true);
   window.removeEventListener("deviceorientation", onOrient, true);
+  window.removeEventListener("devicemotion", onMotion, true);
   if (raf) cancelAnimationFrame(raf); raf = null;
   if (wakeLock){ try{ wakeLock.release(); }catch(e){} wakeLock = null; }
   if (window.speechSynthesis) try{ speechSynthesis.cancel(); }catch(e){}
@@ -1277,13 +1293,74 @@ function onOrient(e){
     feedHeading(norm360(360 - e.alpha + screenAngle()), "compass", e.beta);
   }
 }
-/* Smooth the heading as a unit vector so 359° -> 1° doesn't swing around. */
+/* Phone compasses point to magnetic north and often carry a bias of their own.
+   prefs.hdgOffset is learned while walking outside (see learnOffset) and turns that into true north,
+   which is what the room bearings use. */
+var rawHeading = null, lastHdgT = 0;
+/* Smooth the heading as a unit vector so 359° -> 1° doesn't swing around.
+   Time-based: steady when still, quick to follow a real turn. */
 function feedHeading(h, src, beta){
-  var k = 0.25;
-  if (heading == null){ hx = Math.cos(toRad(h)); hy = Math.sin(toRad(h)); }
-  else { hx = hx*(1-k) + Math.cos(toRad(h))*k; hy = hy*(1-k) + Math.sin(toRad(h))*k; }
+  var now = performance.now(), dt = lastHdgT ? Math.min(0.5, (now - lastHdgT) / 1000) : 0.016; lastHdgT = now;
+  rawHeading = h;
+  h = norm360(h + (prefs.hdgOffset || 0));
+  if (heading == null || headingSrc !== "compass"){ hx = Math.cos(toRad(h)); hy = Math.sin(toRad(h)); }
+  else {
+    var turn = Math.abs(norm180(h - heading));
+    var tau = turn > 30 ? 0.08 : turn > 10 ? 0.15 : 0.3; // seconds
+    var k = 1 - Math.exp(-dt / tau);
+    hx = hx*(1-k) + Math.cos(toRad(h))*k; hy = hy*(1-k) + Math.sin(toRad(h))*k;
+  }
   heading = norm360(toDeg(Math.atan2(hy, hx))); headingSrc = src; lastOrientAt = Date.now();
   tilt = typeof beta === "number" ? Math.abs(beta) : 0;
+}
+/* While walking straight outside with good GPS, the GPS course is the true direction of travel.
+   Slowly pull the compass offset toward (course - compass). Ignores anything off by more than 35°. */
+function learnOffset(course){
+  if (rawHeading == null || !(Date.now() - lastStepAt < 1500)) return;
+  var diff = norm180(course - rawHeading), cur = prefs.hdgOffset || 0, err = norm180(diff - cur);
+  if (Math.abs(diff) > 35 || Math.abs(err) > 25) return;
+  prefs.hdgOffset = norm180(cur + 0.08 * err); offsetSamples++;
+  if (offsetSamples % 10 === 0) savePrefs();
+}
+var offsetSamples = 0;
+
+/* ---------- step counting (pedestrian dead reckoning) ----------
+   Each step moves your position one stride in the compass direction, so the arrow keeps
+   up between GPS readings and indoors where GPS drifts. GPS then corrects any build-up. */
+var gLow = null, aSmooth = 0, armed = true, lastStepAt = 0, motionAt = 0, stepCount = 0;
+function onMotion(e){
+  var a = e.accelerationIncludingGravity; if (!a || a.x == null) return;
+  var m = Math.sqrt(a.x*a.x + a.y*a.y + a.z*a.z), now = Date.now();
+  motionAt = now;
+  if (gLow == null){ gLow = m; aSmooth = 0; return; }
+  gLow += (m - gLow) * 0.02;          // slow: gravity
+  aSmooth += ((m - gLow) - aSmooth) * 0.35; // fast: the bounce of each step
+  if (armed && aSmooth > 1.1 && now - lastStepAt > 280){ armed = false; onStep(now); }
+  else if (!armed && aSmooth < 0.2) armed = true;
+}
+function stride(){ return prefs.stride || 0.6; } // meters; about right for a kid, learned over time
+function onStep(now){
+  lastStepAt = now; stepCount++; calSteps++;
+  $("stepChip").hidden = false; $("stepText").textContent = "Steps: " + stepCount;
+  if (!here || demo || headingSrc !== "compass" || heading == null) return;
+  var L = stride(), p = offsetPoint(here, L, heading);
+  // Each step adds a little doubt: stride length and heading are both a bit off.
+  var v = here.acc * here.acc + Math.pow(0.25 * L, 2) + Math.pow(L * Math.sin(toRad(12)), 2);
+  here = { lat: p.lat, lon: p.lon, acc: Math.sqrt(v) };
+}
+function pdrActive(){ return Date.now() - motionAt < 3000 && headingSrc === "compass"; }
+
+/* Learn the kid's stride: compare steps with GPS distance over a stretch of good readings. */
+var calFrom = null, calSteps = 0;
+function learnStride(gps){
+  if (gps.acc > 8){ calFrom = null; return; }
+  if (!calFrom){ calFrom = gps; calSteps = 0; return; }
+  var dist = distanceM(calFrom, gps);
+  if (calSteps >= 30 && dist >= 20){
+    var s = dist / calSteps;
+    if (s > 0.35 && s < 1.0){ prefs.stride = +(stride() * 0.8 + s * 0.2).toFixed(3); savePrefs(); }
+    calFrom = gps; calSteps = 0;
+  }
 }
 function noCompass(msg){
   if (headingSrc === "compass") return;
@@ -1292,18 +1369,35 @@ function noCompass(msg){
 var fixAt = 0, walkAt = 0;
 /* Blend each GPS reading with the last one, trusting whichever is more accurate.
    Uncertainty grows by walking speed between readings, so real movement still shows up quickly. */
+var lastFixStamp = 0, outliers = 0;
 function onPos(p){
   var c = p.coords, acc = Math.max(3, c.accuracy || 99), now = Date.now();
+  if (p.timestamp && p.timestamp <= lastFixStamp) return; // same reading again
+  lastFixStamp = p.timestamp || now;
   if (acc > 150 && here) return; // ignore wild readings once we have a decent one
+  var gps = { lat: c.latitude, lon: c.longitude, acc: acc };
   if (!here || now - fixAt > 30000){
-    here = { lat: c.latitude, lon: c.longitude, acc: acc };
+    here = gps; outliers = 0;
   } else {
-    var dt = (now - fixAt) / 1000, q = here.acc * here.acc + Math.pow(2.5 * dt, 2), k = q / (q + acc * acc);
-    // A big jump that the error bars can't explain means we really moved: take the new reading.
-    if (distanceM(here, { lat: c.latitude, lon: c.longitude }) > 3 * Math.sqrt(q + acc * acc)) k = 1;
-    here = k === 1 ? { lat: c.latitude, lon: c.longitude, acc: acc } : { lat: here.lat + k * (c.latitude - here.lat), lon: here.lon + k * (c.longitude - here.lon), acc: Math.sqrt((1 - k) * q) };
+    // How far could we have gone since the last reading? With step counting we already moved
+    // the dot, so only a little extra doubt; without it, allow for walking at up to 2.5 m/s.
+    var dt = (now - fixAt) / 1000, drift = pdrActive() ? 0.4 : 2.5;
+    var q = here.acc * here.acc + Math.pow(drift * dt, 2), r = acc * acc, gap = distanceM(here, gps);
+    if (gap > 3 * Math.sqrt(q + r)){
+      // A jump the error bars can't explain. With steps counting, it's usually a GPS bounce
+      // off the building: ignore it unless it keeps happening. Without steps, believe it.
+      outliers++;
+      if (!pdrActive() || outliers >= 3){ here = gps; outliers = 0; }
+      else { here = { lat: here.lat, lon: here.lon, acc: Math.sqrt(q) }; }
+    } else {
+      outliers = 0;
+      var k = q / (q + r);
+      here = { lat: here.lat + k * (gps.lat - here.lat), lon: here.lon + k * (gps.lon - here.lon), acc: Math.max(2, Math.sqrt((1 - k) * q)) };
+    }
   }
   fixAt = now;
+  learnStride(gps);
+  if (c.heading != null && !isNaN(c.heading) && c.heading >= 0 && (c.speed || 0) > 0.8 && acc <= 10 && headingSrc === "compass") learnOffset(c.heading);
   // Without a compass, use the walking direction from GPS when moving.
   if (headingSrc !== "compass" && c.heading != null && !isNaN(c.heading) && c.heading >= 0 && (c.speed || 0) > 0.6){
     heading = c.heading; headingSrc = "walking"; walkAt = now;
@@ -1352,7 +1446,7 @@ function tick(){
   // compass chip
   if (headingSrc === "compass"){
     var shaky = (iosAcc != null && (iosAcc < 0 || iosAcc > 25));
-    setChip("cmp", shaky ? "warn" : "good", shaky ? "Compass: wobbly, wave in a figure 8" : "Compass: on");
+    setChip("cmp", shaky ? "warn" : "good", shaky ? "Compass: wobbly, wave in a figure 8" : prefs.hdgOffset && offsetSamples ? "Compass: on, tuned" : "Compass: on");
   } else if (headingSrc === "walking"){
     setChip("cmp", "warn", "Compass: using your walking");
   }
@@ -1366,6 +1460,9 @@ function tick(){
   if (atConn !== "done" && !via && !demo && !isConn(target) && target.floor && prefs.floor && !sameFloor(prefs.floor, target.floor)) planRoute();
   var dest = leg === "connector" && via ? via : target;
   var d = distanceM(here, dest), b = bearingDeg(here, dest);
+  $("hdgDeg").textContent = heading == null ? "---" : String(Math.round(heading) % 360).padStart(3, "0");
+  $("hdgCard").textContent = heading == null ? "" : ["N","NE","E","SE","S","SW","W","NW"][Math.round(heading / 45) % 8];
+  $("tgtDeg").textContent = String(Math.round(b) % 360).padStart(3, "0");
   var arriveR = Math.max(6, Math.min(acc, 15));
   var routed = !!(via || atConn === "done") && !demo && !isConn(target) && !!target.floor;
   $("legLabel").hidden = !routed;
